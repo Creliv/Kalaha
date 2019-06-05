@@ -8,7 +8,7 @@ import de.htwg.se.Kalaha.view.gui.Gui
 import de.htwg.se.Kalaha.view.tui.Tui
 
 class Controller() extends Observable with ControllerInterface {
-  var board = new Gameboard
+  val board = new Gameboard
   //var vboard = new
   var amountStones = 0
   var undone = false
