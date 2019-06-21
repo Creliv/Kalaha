@@ -13,7 +13,7 @@ class GameboardSpec extends WordSpec with Matchers {
     val board = Gameboard(Array(14))
     "initialized" should {
       "new init" in {
-        board.boardInit()
+        //board.boardInit()
         board.toString should be("06666660666666")
       }
       "new init with 6" in {
@@ -26,7 +26,7 @@ class GameboardSpec extends WordSpec with Matchers {
       }
       "set with array" in {
         var startboard: Array[Int] = Array[Int](15, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1)
-        board.setBoard(startboard)
+        //board.setBoard(startboard)
         board.toString should be("151111110111111")
       }
 
@@ -49,7 +49,7 @@ class GameboardSpec extends WordSpec with Matchers {
         val saveload = new FileIO
         val startFeld = "15000013000001200"
         val startboard: Array[Int] = Array[Int](15, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 1, 0, 0)
-        controller.board.setBoard(startboard)
+        //controller.board.setBoard(startboard)
         val testJson =
           Json.obj(
             "gameboard" -> Json.obj(

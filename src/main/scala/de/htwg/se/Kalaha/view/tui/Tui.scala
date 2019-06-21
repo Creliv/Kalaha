@@ -158,15 +158,13 @@ class Tui(controller: Controller) extends Observer {
   }
 
   def showGameboard(): Unit = {
-    var board = controller.board
-
     val gameboardString = new Array[String](14)
     for (i <- gameboardString.indices) {
-      if (board.gb(i) < 10) {
-        gameboardString(i) = " " + board.gb(i)
+      if (controller.gameboard.gb(i) < 10) {
+        gameboardString(i) = " " + controller.gameboard.gb(i)
       }
       else {
-        gameboardString(i) = "" + board.gb(i)
+        gameboardString(i) = " " + controller.gameboard.gb(i)
       }
     }
     var s = ""
@@ -187,10 +185,10 @@ class Tui(controller: Controller) extends Observer {
       //controller.exit()
     }
     if (controller.p1win) {
-      print("Spieler 1 gewinnt mit " + controller.board.gb(7) + "Punkten!\n")
+      print("Spieler 1 gewinnt mit " + controller.gameboard.gb(7) + "Punkten!\n")
       //controller.exit()
     } else if (controller.p2win) {
-      print("Spieler 2 gewinnt mit " + controller.board.gb(0) + "Punkten!\n")
+      print("Spieler 2 gewinnt mit " + controller.gameboard.gb(0) + "Punkten!\n")
       //controller.exit()
     }
   }

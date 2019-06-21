@@ -9,9 +9,12 @@ import de.htwg.se.Kalaha.view.tui.Tui
 
 class Controller() extends Observable with ControllerInterface {
   val stones: Int = 6
-  var board = Gameboard(Array(0, stones, stones, stones, stones, stones, stones, 0, stones, stones, stones, stones, stones, stones))
-  var gameboard = Gameboard(Array(14))
-  var oldgb = Gameboard(Array(14))
+  val board = new Gameboard(Array(0, stones, stones, stones, stones, stones, stones, 0, stones, stones, stones, stones, stones, stones))
+  val startboard = new Gameboard(Array(0, stones, stones, stones, stones, stones, stones, 0, stones, stones, stones, stones, stones, stones))
+  var gameboard = new Gameboard(Array(14))
+  val oldgb = new Gameboard(Array(0,0,0,0,0,0,0,0,0,0,0,0,0,0))
+  val undostack = new Array[Int](14)
+  val vBoard = new Gameboard(Array(0,0,0,0,0,0,0,0,0,0,0,0,0,0))
   //var vboard = new
   var amountStones = 0
   var undone = false
@@ -19,7 +22,7 @@ class Controller() extends Observable with ControllerInterface {
   var p2win = false
   val p1 = 7
   val p2 = 0
-  private val undoManager = new UndoManager
+  var undoManager: UndoManager = _
   val fileIO = new FileIO
   var round = 0
 
@@ -28,25 +31,20 @@ class Controller() extends Observable with ControllerInterface {
 
   def controllerInit(amountStonesStart: Int): Unit = {
     amountStones = amountStonesStart
-    board.boardInit(amountStonesStart)
+    gameboard.boardInit(amountStonesStart)
     print(board, "---------------------------------")
     // notifyObservers
   }
 
   def controllerInit(): Unit = {
-    //board.gb foreach println
     updateStones(6)
-    //board.boardInit()
+    println(gameboard)
     gameboard = board.copy()
-    gameboard.gb foreach println
-    //println(gameboard, "+++++++++++++")
-    //println(board, "---------------------------------")
-    //println(gameboard, "##################")
-
-    //println(board, "---------------------------------")
-    val tui = new Tui(this)
+    println(gameboard)
+    //gameboard.gb foreach println
+    //val tui = new Tui(this)
     val gui = new Gui(this)
-    tui.startGame()
+    //tui.startGame()
   }
 
   def updateStones(x: Int): Unit = {
@@ -59,7 +57,10 @@ class Controller() extends Observable with ControllerInterface {
     //print("index = " + index + "\n")
     val turn = round % 2
     //print("Turn = " + turn + "\n")
-    oldgb = gameboard.copy()
+    println("TESTTESTTEST")
+    for (i <- 0 to 13) {
+      oldgb.gb(i) = gameboard.gb(i)
+    }
     val countStonesInMuld: Int = gameboard.gb(index)
     //print("Balls = " + countStonesInMuld + "\n")
     gameboard.gb(index) = 0
@@ -133,40 +134,69 @@ class Controller() extends Observable with ControllerInterface {
 
   }
 
+  //TODO fix undo
   def undo(): Unit = {
-    if (undone) {
-         throw new IllegalArgumentException("Es ist nur möglich einen Zug rückgängig zu machen")
-       } else {
-          var vBoard = Gameboard(Array(14))
-          vBoard = gameboard.copy()
-          gameboard = oldgb.copy()
-          oldgb = vBoard.copy()
-          round -= 1
-          undone = true
-          print("undo \n")
-       }
-    //undoManager.undoStep
-    notifyObservers
-  }
+    try{
+      if (undone) {
+        throw new IllegalArgumentException("Es ist nur möglich einen Zug rückgängig zu machen")
+      } else {
+        for (i <- 0 to 13) {
+          vBoard.gb(i) = gameboard.gb(i)
+          gameboard.gb(i) = oldgb.gb(i)
+          oldgb.gb(i) = vBoard.gb(i)
+        }
+        /*for (i <- 0 to 13) {
+          gameboard.gb(i) = oldgb.gb(i)
+        }
+        for (i <- 0 to 13) {
+          oldgb.gb(i) = vBoard.gb(i)
+        }*/
+        round -= 1
+        undone = true
+        notifyObservers
+        print("undo \n")
 
-  def redo(): Unit = {
-    if(!undone) {
-      throw new IllegalArgumentException("Es ist nur möglich einen Zug vorwärts zu machen")
-    } else {
-    var vBoard = Gameboard(Array(14))
-    vBoard = gameboard.copy()
-    gameboard = oldgb.copy()
-    oldgb = vBoard.copy()
-    round += 1
-    print("redo \n")
-    undone = false
+      }
+      //undoManager.undoStep
+      notifyObservers
+    } catch {
+      case e: IllegalArgumentException => print(e)
     }
-    //undoManager.redoStep
-    notifyObservers
+
   }
 
+  //TODO fix redo
+  def redo(): Unit = {
+    try {
+      if(!undone) {
+        throw new IllegalArgumentException("Es ist nur möglich einen Zug vorwärts zu machen")
+      } else {
+        for (i <- 0 to 13) {
+          vBoard.gb(i) = gameboard.gb(i)
+          gameboard.gb(i) = oldgb.gb(i)
+          oldgb.gb(i) = vBoard.gb(i)
+        }
+        /*for (i <- 0 to 13) {
+          gameboard.gb(i) = oldgb.gb(i)
+        }
+        for (i <- 0 to 13) {
+          oldgb.gb(i) = vBoard.gb(i)
+        }*/
+        round += 1
+        print("redo \n")
+        undone = false
+      }
+      //undoManager.redoStep
+      notifyObservers
+    } catch {
+      case e: IllegalArgumentException => print(e)
+    }
+  }
+
+  //TODO fix restart
   def reset(): Unit = {
-    board.boardInit(amountStones)
+    gameboard = Gameboard(Array(0, amountStones, amountStones, amountStones, amountStones, amountStones, amountStones, 0, amountStones, amountStones, amountStones, amountStones, amountStones, amountStones))
+    //gameboard.boardInit(6)
     round = 0
     notifyObservers
   }

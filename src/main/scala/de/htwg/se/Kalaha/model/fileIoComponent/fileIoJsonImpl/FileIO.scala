@@ -12,8 +12,8 @@ import scala.io.Source
 
 class FileIO extends FileIOInterface {
   var round = 0
-  var boardArray = new Array[Int](14)
-  var boardArray2 = Gameboard(Array(14))
+  //var boardArray = new Array[Int](14)
+  //var boardArray2 = Gameboard(Array(14))
   //var value = 0
 
   override def load(controller: Controller): Unit = {
@@ -36,8 +36,8 @@ class FileIO extends FileIOInterface {
     for (feld <- jsonList) {
       print(feld)
       for (i: Int <- 0 to 13) {
-        controller.board.gb(i) = (feld \ i.toString).get.toString().toInt
-        print((feld \ i.toString).get.toString().toInt)
+        controller.gameboard.gb(i) = (feld \ i.toString).get.toString().toInt
+        //print((feld \ i.toString).get.toString().toInt)
       }
     }
   }
@@ -55,20 +55,20 @@ class FileIO extends FileIOInterface {
         "round" -> JsNumber(round),
         "board" -> Json.arr(
           Json.obj(
-            "0" -> controller.board.gb(0),
-            "1" -> controller.board.gb(1),
-            "2" -> controller.board.gb(2),
-            "3" -> controller.board.gb(3),
-            "4" -> controller.board.gb(4),
-            "5" -> controller.board.gb(5),
-            "6" -> controller.board.gb(6),
-            "7" -> controller.board.gb(7),
-            "8" -> controller.board.gb(8),
-            "9" -> controller.board.gb(9),
-            "10" -> controller.board.gb(10),
-            "11" -> controller.board.gb(11),
-            "12" -> controller.board.gb(12),
-            "13" -> controller.board.gb(13),
+            "0" -> controller.gameboard.gb(0),
+            "1" -> controller.gameboard.gb(1),
+            "2" -> controller.gameboard.gb(2),
+            "3" -> controller.gameboard.gb(3),
+            "4" -> controller.gameboard.gb(4),
+            "5" -> controller.gameboard.gb(5),
+            "6" -> controller.gameboard.gb(6),
+            "7" -> controller.gameboard.gb(7),
+            "8" -> controller.gameboard.gb(8),
+            "9" -> controller.gameboard.gb(9),
+            "10" -> controller.gameboard.gb(10),
+            "11" -> controller.gameboard.gb(11),
+            "12" -> controller.gameboard.gb(12),
+            "13" -> controller.gameboard.gb(13),
           )
         )
       )

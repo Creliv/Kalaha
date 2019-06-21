@@ -64,7 +64,7 @@ class Gui(controller: Controller) extends Frame with Observer {
       mnemonic = Key.F
       contents += new MenuItem(Action("Neues Spiel") {
         reset
-        redraw()
+        //redraw()
       })
       contents += new MenuItem(Action("Als JSON speichern") {
         controller.save
@@ -83,11 +83,11 @@ class Gui(controller: Controller) extends Frame with Observer {
       mnemonic = Key.E
       contents += new MenuItem(Action("Undo") {
         controller.undo
-        redraw()
+        //redraw()
       })
       contents += new MenuItem(Action("Redo") {
         controller.redo
-        redraw()
+        //redraw()
       })
     }
     contents += new Menu("Options") {

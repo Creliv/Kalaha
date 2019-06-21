@@ -102,7 +102,7 @@ class ControllerSpec extends WordSpec with Matchers {
     val controller = new Controller
     val startFeld = "15000013000001200"
     val startboard: Array[Int] = Array[Int](15, zero, zero, zero, zero, 13, zero, zero, zero, zero, zero, 12, zero, zero)
-    controller.board.setBoard(startboard)
+    //controller.board.setBoard(startboard)
     "in BIG game player 2" should {
       controller.round = five
       "to string" in {
@@ -132,7 +132,7 @@ class ControllerSpec extends WordSpec with Matchers {
     val startFeld = "15000012000001200"
     val after = "1511100131101311"
     val startboard: Array[Int] = Array[Int](15, zero, zero, zero, zero, 12, zero, zero, zero, zero, zero, 12, zero, zero)
-    controller.board.setBoard(startboard)
+    //controller.board.setBoard(startboard)
     "in BIG game player 1" should {
       controller.round = four
       "to string" in {
@@ -165,7 +165,7 @@ class ControllerSpec extends WordSpec with Matchers {
       val startFeld = "152000002000100"
       val winField = "180000002000000"
       val startboard: Array[Int] = Array[Int](15, two, zero, zero, zero, zero, zero, 2, zero, zero, zero, 1, zero, zero)
-      controller.board.setBoard(startboard)
+      //controller.board.setBoard(startboard)
       "checkWin but nobodys win" in{
         controller.checkWin()
         controller.board.toString should be (startFeld)
@@ -184,7 +184,7 @@ class ControllerSpec extends WordSpec with Matchers {
       val startFeld = "152000002000100"
       val winField = "500000015000000"
       val startboard: Array[Int] = Array[Int](two, two, zero, zero, zero, zero, zero, 15, zero, zero, zero, 1, zero, zero)
-      controller.board.setBoard(startboard)
+      //controller.board.setBoard(startboard)
       "checkWin" in{
         controller.move(11)
         controller.move(12)
@@ -213,7 +213,7 @@ class ControllerSpec extends WordSpec with Matchers {
       val startFeld = "22000005000100"
       val winField = "50000005000000"
       val startboard: Array[Int] = Array[Int](two, two, zero, zero, zero, zero, zero, 5, zero, zero, zero, 1, zero, zero)
-      controller.board.setBoard(startboard)
+      //controller.board.setBoard(startboard)
       "checkWin" in{
         controller.move(11)
         controller.move(12)

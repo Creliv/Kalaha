@@ -2,7 +2,7 @@ package de.htwg.se.Kalaha.controller.controllerComponent
 
 trait ControllerInterface {
 
-  def controllerInit(amountStonesStart: Int): Unit
+  //def controllerInit(amountStonesStart: Int): Unit
 
   def controllerInit(): Unit
 
