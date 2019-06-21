@@ -1,10 +1,14 @@
 package de.htwg.se.Kalaha
 
-import de.htwg.se.Kalaha.controller.controllerComponent.ControllerImpl.Controller
+import com.google.inject.Guice
+import de.htwg.se.Kalaha.controller.controllerComponent.ControllerInterface
 
 object Kalaha {
+
+        val injector = Guice.createInjector(new KalahaModule)
+        var controller = injector.getInstance(classOf[ControllerInterface])
+
         def main(args: Array[String]): Unit = {
-                val controller = new Controller
                 controller.controllerInit()
                 //val tui = new Tui(controller)
                 //tui.startGame()

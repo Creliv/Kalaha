@@ -17,7 +17,7 @@ class Controller() extends Observable with ControllerInterface {
   val p1 = 7
   val p2 = 0
   private val undoManager = new UndoManager
-  var fileIO = new FileIO
+  val fileIO = new FileIO
 
   //val injector = Guice.createInjector(new GameboardModule)
   //val fileIo = injector.instance[FileIOInterface]
@@ -188,7 +188,7 @@ class Controller() extends Observable with ControllerInterface {
       case a if board.gameboard(p1) > board.gameboard(p2) =>
         //print("P1: " + board.gameboard(p1) + " P2: " + board.gameboard(2) + "\n")
         print("WIN PLAYER 1\n")
-        p1win = true
+        p1win  = true
       case a if board.gameboard(p2) > board.gameboard(p1) =>
         //print("P1: " + board.gameboard(p1) + " P2: " + board.gameboard(p2) + "\n")
         print("WIN PLAYER 2\n")
