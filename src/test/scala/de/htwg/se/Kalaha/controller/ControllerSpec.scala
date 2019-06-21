@@ -22,7 +22,7 @@ class ControllerSpec extends WordSpec with Matchers {
         "in game general" should {
           "reset" in {
             controller.reset()
-            controller.board.toString should be(startFeld)
+            controller.gameboard.toString should be(startFeld)
           }
           "exit" in {
             //      controller.exit() should be sys.exit(0)
@@ -56,19 +56,19 @@ class ControllerSpec extends WordSpec with Matchers {
     "in game player 1" should {
       "move player 1" in {
         controller.move(two)
-        controller.board.toString should be("06077771766666")
+        controller.gameboard.toString should be("06077771766666")
       }
       "undo after move" in {
         controller.undo()
-        controller.board.toString should be(startFeld)
+        controller.gameboard.toString should be(startFeld)
       }
       "redo player 1" in {
         controller.redo()
-        controller.board.toString should be("06077771766666")
+        controller.gameboard.toString should be("06077771766666")
       }
       "move player 1 but fails cause empty field" in {
         controller.move(two)
-        controller.board.toString should be("06077771766666")
+        controller.gameboard.toString should be("06077771766666")
       }
     }
   }
@@ -81,20 +81,20 @@ class ControllerSpec extends WordSpec with Matchers {
       controller.round = five
       "move player 2" in {
         controller.move(ten)
-        controller.board.toString should be("17766660660777")
+        controller.gameboard.toString should be("17766660660777")
       }
       "undo after move" in {
         controller.undo()
-        controller.board.toString should be(startFeld)
+        controller.gameboard.toString should be(startFeld)
       }
       "redo player 2" in {
         controller.redo()
-        controller.board.toString should be("17766660660777")
+        controller.gameboard.toString should be("17766660660777")
       }
       "move player 2 but fails cause empty field" in {
         print(controller.round)
         controller.move(ten)
-        controller.board.toString should be("17766660660777")
+        controller.gameboard.toString should be("17766660660777")
       }
     }
   }
@@ -106,24 +106,24 @@ class ControllerSpec extends WordSpec with Matchers {
     "in BIG game player 2" should {
       controller.round = five
       "to string" in {
-        controller.board.toString should be(startFeld)
+        controller.gameboard.toString should be(startFeld)
       }
       "move player 2" in {
         controller.move(11)
-        controller.board.toString should be("1811101410110011")
+        controller.gameboard.toString should be("1811101410110011")
       }
       "undo after move" in {
         controller.undo()
-        controller.board.toString should be(startFeld)
+        controller.gameboard.toString should be(startFeld)
       }
       "redo player 2" in {
         controller.redo()
-        controller.board.toString should be("1811101410110011")
+        controller.gameboard.toString should be("1811101410110011")
       }
       "move player 2 but fails cause empty field" in {
         print(controller.round)
         controller.move(11)
-        controller.board.toString should be("1811101410110011")
+        controller.gameboard.toString should be("1811101410110011")
       }
     }
   }
@@ -136,24 +136,24 @@ class ControllerSpec extends WordSpec with Matchers {
     "in BIG game player 1" should {
       controller.round = four
       "to string" in {
-        controller.board.toString should be(startFeld)
+        controller.gameboard.toString should be(startFeld)
       }
       "move" in {
         controller.move(five)
-        controller.board.toString should be(after)
+        controller.gameboard.toString should be(after)
       }
       "undo after move" in {
         controller.undo()
-        controller.board.toString should be(startFeld)
+        controller.gameboard.toString should be(startFeld)
       }
       "redo" in {
         controller.redo()
-        controller.board.toString should be(after)
+        controller.gameboard.toString should be(after)
       }
       "move but fails cause empty field" in {
         print(controller.round)
         controller.move(five)
-        controller.board.toString should be(after)
+        controller.gameboard.toString should be(after)
       }
     }
   }
@@ -168,13 +168,13 @@ class ControllerSpec extends WordSpec with Matchers {
       //controller.board.setBoard(startboard)
       "checkWin but nobodys win" in{
         controller.checkWin()
-        controller.board.toString should be (startFeld)
+        controller.gameboard.toString should be (startFeld)
       }
       "checkWin" in{
         controller.move(11)
         controller.move(12)
         controller.checkWin()
-        controller.board.toString should be (winField)
+        controller.gameboard.toString should be (winField)
       }
     }
   }
@@ -189,7 +189,7 @@ class ControllerSpec extends WordSpec with Matchers {
         controller.move(11)
         controller.move(12)
         controller.checkWin()
-        controller.board.toString should be (winField)
+        controller.gameboard.toString should be (winField)
       }
     }
   }
@@ -199,7 +199,7 @@ class ControllerSpec extends WordSpec with Matchers {
       val startFeld6 = "06666660666666"
       "controllerInit"in{
         controller.controllerInit(six)
-        controller.board.toString should be(startFeld6)
+        controller.gameboard.toString should be(startFeld6)
       }
       "updateStones"in{
         controller.updateStones(four)
@@ -218,7 +218,7 @@ class ControllerSpec extends WordSpec with Matchers {
         controller.move(11)
         controller.move(12)
         controller.checkWin()
-        controller.board.toString should be (winField)
+        controller.gameboard.toString should be (winField)
       }
     }
   }

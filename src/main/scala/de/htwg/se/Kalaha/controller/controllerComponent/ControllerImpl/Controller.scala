@@ -12,13 +12,10 @@ import scala.swing.Publisher
 
 class Controller() extends Observable with ControllerInterface with Publisher{
   val stones: Int = 6
-  val board = new Gameboard(Array(0, stones, stones, stones, stones, stones, stones, 0, stones, stones, stones, stones, stones, stones))
-  val startboard = new Gameboard(Array(0, stones, stones, stones, stones, stones, stones, 0, stones, stones, stones, stones, stones, stones))
-  var gameboard = new Gameboard(Array(14))
+  val boardArray = Array(0, stones, stones, stones, stones, stones, stones, 0, stones, stones, stones, stones, stones, stones)
+  var gameboard = new Gameboard(Array(0,0,0,0,0,0,0,0,0,0,0,0,0,0))
   val oldgb = new Gameboard(Array(0,0,0,0,0,0,0,0,0,0,0,0,0,0))
-  val undostack = new Array[Int](14)
   val vBoard = new Gameboard(Array(0,0,0,0,0,0,0,0,0,0,0,0,0,0))
-  //var vboard = new
 
   var gameStatus: GameStatus = IDLE
 
@@ -38,7 +35,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
   def controllerInit(amountStonesStart: Int): Unit = {
     amountStones = amountStonesStart
     gameboard.boardInit(amountStonesStart)
-    print(board, "---------------------------------")
+    print(boardArray, "---------------------------------")
     // notifyObservers
     gameStatus = NEW
     //publish()
@@ -46,9 +43,9 @@ class Controller() extends Observable with ControllerInterface with Publisher{
 
   def controllerInit(): Unit = {
     updateStones(6)
-    println(gameboard)
-    gameboard = board.copy()
-    println(gameboard)
+    //println(gameboard)
+    gameboard.boardInit(boardArray)
+    //println(gameboard)
     val gui = new Gui(this)
     //val tui = new Tui(this)
     //tui.startGame()
@@ -141,72 +138,53 @@ class Controller() extends Observable with ControllerInterface with Publisher{
 
   }
 
-  //TODO fix undo
   def undo(): Unit = {
     try{
       if (undone) {
         throw new IllegalArgumentException("Es ist nur möglich einen Zug rückgängig zu machen")
       } else {
+        //undoManager.undoStep
         for (i <- 0 to 13) {
           vBoard.gb(i) = gameboard.gb(i)
           gameboard.gb(i) = oldgb.gb(i)
           oldgb.gb(i) = vBoard.gb(i)
         }
-
-        /*for (i <- 0 to 13) {
-          gameboard.gb(i) = oldgb.gb(i)
-        }
-        for (i <- 0 to 13) {
-          oldgb.gb(i) = vBoard.gb(i)
-        }*/
         round -= 1
         undone = true
         notifyObservers
         print("undo \n")
         gameStatus = UNDO
       }
-      //undoManager.undoStep
       notifyObservers
     } catch {
       case e: IllegalArgumentException => print(e)
     }
-
   }
 
-  //TODO fix redo
   def redo(): Unit = {
     try {
       if(!undone) {
         throw new IllegalArgumentException("Es ist nur möglich einen Zug vorwärts zu machen")
       } else {
+        //undoManager.redoStep
         for (i <- 0 to 13) {
           vBoard.gb(i) = gameboard.gb(i)
           gameboard.gb(i) = oldgb.gb(i)
           oldgb.gb(i) = vBoard.gb(i)
         }
-
-        /*for (i <- 0 to 13) {
-          gameboard.gb(i) = oldgb.gb(i)
-        }
-        for (i <- 0 to 13) {
-          oldgb.gb(i) = vBoard.gb(i)
-        }*/
         round += 1
         print("redo \n")
         undone = false
         gameStatus = REDO
       }
-      //undoManager.redoStep
       notifyObservers
     } catch {
       case e: IllegalArgumentException => print(e)
     }
   }
-
-  //TODO fix restart
+  
   def reset(): Unit = {
-    gameboard = Gameboard(Array(0, amountStones, amountStones, amountStones, amountStones, amountStones, amountStones, 0, amountStones, amountStones, amountStones, amountStones, amountStones, amountStones))
-    //gameboard.boardInit(6)
+    gameboard.boardInit(amountStones)
     round = 0
     notifyObservers
   }
@@ -254,17 +232,8 @@ class Controller() extends Observable with ControllerInterface with Publisher{
     gameStatus = WON
   }
 
-  def exit(): Unit = {
-    sys.exit(0)
-  }
-
-  def save: Unit = {
-    fileIO.save(this, board)
-  }
-
-  def load: Unit = {
-    fileIO.load(this)
-  }
-
+  def exit(): Unit = sys.exit(0)
+  def save: Unit = fileIO.save(this, gameboard)
+  def load: Unit = fileIO.load(this)
   def statusText:String = GameStatus.message(gameStatus)
 }

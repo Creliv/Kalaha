@@ -11,7 +11,7 @@ case class Gameboard(gb: Array[Int]) extends GameboardInterface {
     val stones2 = amountStonesStart
     gb(0) = 0
     gb(7) = 0
-    for (i <- 2 until 7) {
+    for (i <- 1 until 7) {
       gb(i) = amountStonesStart
     }
     for (i <- 8 until SIZE) {
@@ -19,9 +19,17 @@ case class Gameboard(gb: Array[Int]) extends GameboardInterface {
     }
   }
 
-  def boardInit(): Unit = ???
+  def boardInit(gameboard: Array[Int]): Unit = {
+    for (i <- 0 to 13) {
+      gb(i) = gameboard(i)
+    }
+  }
 
-  //def setBoard(newBoard: Array[Int]): Unit = ???
+  def setBoard(newBoard: Array[Int]): Unit = {
+    for (i <- 0 to 13) {
+      gb(i) = newBoard(i)
+    }
+  }
 
   override def toString: String = {
     var s: String = ""
