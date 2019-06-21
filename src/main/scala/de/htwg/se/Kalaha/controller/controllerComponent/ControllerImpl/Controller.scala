@@ -1,13 +1,16 @@
 package de.htwg.se.Kalaha.controller.controllerComponent.ControllerImpl
 
-import de.htwg.se.Kalaha.controller.controllerComponent.ControllerInterface
+import de.htwg.se.Kalaha.controller.controllerComponent.{ControllerInterface, GameStatus}
+import de.htwg.se.Kalaha.controller.controllerComponent.GameStatus._
 import de.htwg.se.Kalaha.model.gameboardController.GameboardImpl.Gameboard
 import de.htwg.se.Kalaha.model.fileIoComponent.fileIoJsonImpl.FileIO
 import de.htwg.se.Kalaha.util.{Observable, UndoManager}
 import de.htwg.se.Kalaha.view.gui.Gui
 import de.htwg.se.Kalaha.view.tui.Tui
 
-class Controller() extends Observable with ControllerInterface {
+import scala.swing.Publisher
+
+class Controller() extends Observable with ControllerInterface with Publisher{
   val stones: Int = 6
   val board = new Gameboard(Array(0, stones, stones, stones, stones, stones, stones, 0, stones, stones, stones, stones, stones, stones))
   val startboard = new Gameboard(Array(0, stones, stones, stones, stones, stones, stones, 0, stones, stones, stones, stones, stones, stones))
@@ -16,13 +19,16 @@ class Controller() extends Observable with ControllerInterface {
   val undostack = new Array[Int](14)
   val vBoard = new Gameboard(Array(0,0,0,0,0,0,0,0,0,0,0,0,0,0))
   //var vboard = new
+
+  var gameStatus: GameStatus = IDLE
+
   var amountStones = 0
   var undone = false
   var p1win = false
   var p2win = false
   val p1 = 7
   val p2 = 0
-  var undoManager: UndoManager = _
+  private val undoManager = new UndoManager
   val fileIO = new FileIO
   var round = 0
 
@@ -34,6 +40,8 @@ class Controller() extends Observable with ControllerInterface {
     gameboard.boardInit(amountStonesStart)
     print(board, "---------------------------------")
     // notifyObservers
+    gameStatus = NEW
+    //publish()
   }
 
   def controllerInit(): Unit = {
@@ -41,9 +49,8 @@ class Controller() extends Observable with ControllerInterface {
     println(gameboard)
     gameboard = board.copy()
     println(gameboard)
-    //gameboard.gb foreach println
-    //val tui = new Tui(this)
     val gui = new Gui(this)
+    //val tui = new Tui(this)
     //tui.startGame()
   }
 
@@ -145,6 +152,7 @@ class Controller() extends Observable with ControllerInterface {
           gameboard.gb(i) = oldgb.gb(i)
           oldgb.gb(i) = vBoard.gb(i)
         }
+
         /*for (i <- 0 to 13) {
           gameboard.gb(i) = oldgb.gb(i)
         }
@@ -155,7 +163,7 @@ class Controller() extends Observable with ControllerInterface {
         undone = true
         notifyObservers
         print("undo \n")
-
+        gameStatus = UNDO
       }
       //undoManager.undoStep
       notifyObservers
@@ -176,6 +184,7 @@ class Controller() extends Observable with ControllerInterface {
           gameboard.gb(i) = oldgb.gb(i)
           oldgb.gb(i) = vBoard.gb(i)
         }
+
         /*for (i <- 0 to 13) {
           gameboard.gb(i) = oldgb.gb(i)
         }
@@ -185,6 +194,7 @@ class Controller() extends Observable with ControllerInterface {
         round += 1
         print("redo \n")
         undone = false
+        gameStatus = REDO
       }
       //undoManager.redoStep
       notifyObservers
@@ -241,6 +251,7 @@ class Controller() extends Observable with ControllerInterface {
         p2win = true
         p1win = true
     }
+    gameStatus = WON
   }
 
   def exit(): Unit = {
@@ -255,4 +266,5 @@ class Controller() extends Observable with ControllerInterface {
     fileIO.load(this)
   }
 
+  def statusText:String = GameStatus.message(gameStatus)
 }

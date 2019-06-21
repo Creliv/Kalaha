@@ -28,6 +28,8 @@ class Gui(controller: Controller) extends Frame with Observer {
 
   setButtons()
 
+  val statusline = new TextField(controller.statusText, 20)
+
   val textPanel: TextField = new TextField() {
     editable = false
     background = Color.decode("#cc2023")
@@ -56,6 +58,7 @@ class Gui(controller: Controller) extends Frame with Observer {
     add(kalaha1, BorderPanel.Position.East)
     add(kalaha2, BorderPanel.Position.West)
     add(gridPanel, BorderPanel.Position.Center)
+    add(statusline, BorderPanel.Position.South)
   }
   buttonActionListener()
 
@@ -217,6 +220,7 @@ class Gui(controller: Controller) extends Frame with Observer {
   }
 
   override def update(): Unit = {
+    controller.statusText()
     checkWin()
     redraw()
   }

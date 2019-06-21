@@ -26,6 +26,9 @@ trait ControllerInterface {
 
   def exit(): Unit
 
-  def save: Unit
+  def save(): Unit
 
+  def load(): Unit
+
+  def statusText(): String
 }
