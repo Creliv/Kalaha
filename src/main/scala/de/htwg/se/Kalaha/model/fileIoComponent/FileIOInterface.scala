@@ -6,6 +6,6 @@ import de.htwg.se.Kalaha.model.gameboardController.GameboardImpl.Gameboard
 trait FileIOInterface {
 
   def load(controller: Controller)
-  def save(board:Gameboard):Unit
+  def save(controller: Controller, board:Gameboard):Unit
 
 }

@@ -21,7 +21,7 @@ class Gui(controller: Controller) extends Frame with Observer {
 
   var fieldButtons = Array.ofDim[FieldButton](row, col)
 
-  var p = new Publisher {}
+  //var p = new Publisher {}
 
   title = "Kalaha"
   preferredSize = new Dimension(width, height)
@@ -38,7 +38,7 @@ class Gui(controller: Controller) extends Frame with Observer {
     font = new Font("Arial", 0, 150)
     editable = false
     background = Color.decode("#cc2023")
-    text = controller.board.gameboard(controller.p1).toString
+    text = controller.gameboard.gb(controller.p1).toString
     preferredSize = new Dimension(200, 600)
   }
 
@@ -46,7 +46,7 @@ class Gui(controller: Controller) extends Frame with Observer {
     font = new Font("Arial", 0, 150)
     background = Color.decode("#6365ff")
     //print("p2: " + controller.board.gameboard(0).toString)
-    text = controller.board.gameboard(0).toString
+    text = controller.gameboard.gb(0).toString
     preferredSize = new Dimension(200, 600)
     editable = false
   }
@@ -115,7 +115,7 @@ class Gui(controller: Controller) extends Frame with Observer {
         contents += fieldButtons(x)(y)
       }
     }
-    print("-------------------------test")
+    //print("-------------------------test")
 
   }
 
@@ -123,11 +123,11 @@ class Gui(controller: Controller) extends Frame with Observer {
     for (x <- 0 until col) {
       fieldButtons(0)(x) = new FieldButton(Point(0, x))
       fieldButtons(0)(x).background = Color.decode("#6365ff")
-      fieldButtons(0)(x).text = "" + controller.board.gameboard(13 - x)
+      fieldButtons(0)(x).text = "" + controller.gameboard.gb(13 - x)
       fieldButtons(0)(x).font = new Font("Arial", 0, 50)
       fieldButtons(1)(x) = new FieldButton(Point(1, x))
       fieldButtons(1)(x).background = Color.decode("#cc2023") //java.awt.Color.RED
-      fieldButtons(1)(x).text = "" + controller.board.gameboard(x + 1)
+      fieldButtons(1)(x).text = "" + controller.gameboard.gb(x + 1)
       fieldButtons(1)(x).font = new Font("Arial", 0, 50)
     }
   }
@@ -138,11 +138,11 @@ class Gui(controller: Controller) extends Frame with Observer {
       y <- 0 until col
     } fieldButtons(x)(y).reactions += {
       case b: ButtonClicked =>
-        if (controller.board.round % 2 == 0) {
+        if (controller.round % 2 == 0) {
           if (x == 0) {
             val dia = Dialog.showConfirmation(contents.head, "Falscher Spieler", "Hinweis", optionType = Dialog.Options.Default)
           } else {
-            if(controller.board.gameboard(y + 1) == 0) {
+            if(controller.gameboard.gb(y + 1) == 0) {
               val dia = Dialog.showConfirmation(contents.head, "Feld darf nicht leer sein", "Hinweis", optionType = Dialog.Options.Default)
             } else {
               controller.move(y + 1)
@@ -150,11 +150,11 @@ class Gui(controller: Controller) extends Frame with Observer {
             }
           }
 
-        } else if (controller.board.round % 2 == 1) {
+        } else if (controller.round % 2 == 1) {
           if (x == 1) {
             val dia = Dialog.showConfirmation(contents.head, "Falscher Spieler", "Hinweis", optionType = Dialog.Options.Default)
           } else {
-            if(controller.board.gameboard(13 - y) == 0) {
+            if(controller.gameboard.gb(13 - y) == 0) {
               val dia = Dialog.showConfirmation(contents.head, "Feld darf nicht leer sein", "Hinweis", optionType = Dialog.Options.Default)
             } else {
               controller.move(13 - y)
@@ -166,7 +166,7 @@ class Gui(controller: Controller) extends Frame with Observer {
   }
 
   def redraw(): Unit = {
-    if (controller.board.round % 2 == 0) {
+    if (controller.round % 2 == 0) {
       textPanel.background = Color.decode("#cc2023")
       str = "Spieler 1 ist am Zug"
       textPanel.text_=(str)
@@ -176,11 +176,11 @@ class Gui(controller: Controller) extends Frame with Observer {
       textPanel.text_=(str)
     }
     for (x <- 0 until col) {
-      fieldButtons(0)(x).text = "" + controller.board.gameboard(13 - x)
-      fieldButtons(1)(x).text = "" + controller.board.gameboard(x + 1)
+      fieldButtons(0)(x).text = "" + controller.gameboard.gb(13 - x)
+      fieldButtons(1)(x).text = "" + controller.gameboard.gb(x + 1)
     }
-    kalaha1.text = controller.board.gameboard(controller.p1).toString
-    kalaha2.text = "" + controller.board.gameboard(0)
+    kalaha1.text = controller.gameboard.gb(controller.p1).toString
+    kalaha2.text = "" + controller.gameboard.gb(0)
 
     repaint
   }
@@ -206,11 +206,11 @@ class Gui(controller: Controller) extends Frame with Observer {
       controller.exit()
     }
     if(controller.p1win) {
-      val str = "Spieler 1 gewinnt mit " + controller.board.gameboard(controller.p1) + " Punkten! Spieler 2 hat " + controller.board.gameboard(0) + " Punkte."
+      val str = "Spieler 1 gewinnt mit " + controller.gameboard.gb(controller.p1) + " Punkten! Spieler 2 hat " + controller.gameboard.gb(0) + " Punkte."
         val dia = Dialog.showConfirmation(contents.head, str, "Spielende", optionType = Dialog.Options.Default)
         controller.exit()
     } else if (controller.p2win) {
-      val str = "Spieler 2 gewinnt mit " + controller.board.gameboard(0) + " Punkten! Spieler 2 hat " + controller.board.gameboard(controller.p1) + " Punkte."
+      val str = "Spieler 2 gewinnt mit " + controller.gameboard.gb(0) + " Punkten! Spieler 2 hat " + controller.gameboard.gb(controller.p1) + " Punkte."
       val dia = Dialog.showConfirmation(contents.head, str, "Spielende", optionType = Dialog.Options.Default)
       controller.exit()
     }

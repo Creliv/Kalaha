@@ -78,7 +78,7 @@ class ControllerSpec extends WordSpec with Matchers {
     val startFeld = "06666660666666"
     "in game player 2" should {
       controller.controllerInit(six)
-      controller.board.round = five
+      controller.round = five
       "move player 2" in {
         controller.move(ten)
         controller.board.toString should be("17766660660777")
@@ -92,7 +92,7 @@ class ControllerSpec extends WordSpec with Matchers {
         controller.board.toString should be("17766660660777")
       }
       "move player 2 but fails cause empty field" in {
-        print(controller.board.round)
+        print(controller.round)
         controller.move(ten)
         controller.board.toString should be("17766660660777")
       }
@@ -104,7 +104,7 @@ class ControllerSpec extends WordSpec with Matchers {
     val startboard: Array[Int] = Array[Int](15, zero, zero, zero, zero, 13, zero, zero, zero, zero, zero, 12, zero, zero)
     controller.board.setBoard(startboard)
     "in BIG game player 2" should {
-      controller.board.round = five
+      controller.round = five
       "to string" in {
         controller.board.toString should be(startFeld)
       }
@@ -121,7 +121,7 @@ class ControllerSpec extends WordSpec with Matchers {
         controller.board.toString should be("1811101410110011")
       }
       "move player 2 but fails cause empty field" in {
-        print(controller.board.round)
+        print(controller.round)
         controller.move(11)
         controller.board.toString should be("1811101410110011")
       }
@@ -134,7 +134,7 @@ class ControllerSpec extends WordSpec with Matchers {
     val startboard: Array[Int] = Array[Int](15, zero, zero, zero, zero, 12, zero, zero, zero, zero, zero, 12, zero, zero)
     controller.board.setBoard(startboard)
     "in BIG game player 1" should {
-      controller.board.round = four
+      controller.round = four
       "to string" in {
         controller.board.toString should be(startFeld)
       }
@@ -151,7 +151,7 @@ class ControllerSpec extends WordSpec with Matchers {
         controller.board.toString should be(after)
       }
       "move but fails cause empty field" in {
-        print(controller.board.round)
+        print(controller.round)
         controller.move(five)
         controller.board.toString should be(after)
       }

@@ -1,6 +1,7 @@
 package de.htwg.se.Kalaha.model.gameboardController.GameboardImpl
 
 import de.htwg.se.Kalaha.controller.controllerComponent.ControllerImpl.Controller
+import de.htwg.se.Kalaha.model.fileIoComponent.fileIoJsonImpl.FileIO
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{Matchers, WordSpec}
@@ -9,7 +10,7 @@ import play.api.libs.json.{JsNumber, JsValue, Json}
 @RunWith(classOf[JUnitRunner])
 class GameboardSpec extends WordSpec with Matchers {
   "A GameBoard" when {
-    val board = Gameboard()
+    val board = Gameboard(Array(14))
     "initialized" should {
       "new init" in {
         board.boardInit()
@@ -30,21 +31,22 @@ class GameboardSpec extends WordSpec with Matchers {
       }
 
       "have empty space" in {
-        board.startboard(0) should be(0)
-        board.startboard(7) should be(0)
+        board.gb(0) should be(0)
+        board.gb(7) should be(0)
       }
       "have no field with 0 from 1 to 6" in {
         for (y <- 1 to 6) {
-          board.startboard(y) shouldNot be(0)
+          board.gb(y) shouldNot be(0)
         }
       }
       "have no field with 0 from 8 to 13" in {
         for (y <- 1 to 6) {
-          board.startboard(y + 7) shouldNot be(0)
+          board.gb(y + 7) shouldNot be(0)
         }
       }
       "ToJson" in {
         val controller = new Controller
+        val saveload = new FileIO
         val startFeld = "15000013000001200"
         val startboard: Array[Int] = Array[Int](15, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 1, 0, 0)
         controller.board.setBoard(startboard)
@@ -69,7 +71,7 @@ class GameboardSpec extends WordSpec with Matchers {
                   "12" -> 0,
                   "13" -> 0
                 ))))
-        controller.board.toJson should be(testJson)
+        saveload.toJson(controller) should be(testJson)
       }
     }
   }

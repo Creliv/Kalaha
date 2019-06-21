@@ -13,11 +13,11 @@ class SetCommand (controller: Controller, index: Int) extends Command {
   override def undoStep: Unit = {
     print("---------------------------------------------------------------------- undone:")
    // if (!undone) {
-      val vBoard = new Gameboard
-      vBoard.gameboard = controller.board.gameboard.clone()
-      controller.board.gameboard = controller.board.oldgb.clone()
-      controller.board.oldgb = vBoard.gameboard.clone()
-      controller.board.round -= 1
+      var vBoard = new Gameboard(Array(14))
+      vBoard = controller.gameboard.copy()
+      controller.gameboard = controller.oldgb.copy()
+      controller.oldgb = vBoard.copy()
+      controller.round -= 1
       //undone = true
       print("undo \n")
    // }
@@ -37,11 +37,11 @@ class SetCommand (controller: Controller, index: Int) extends Command {
   override def redoStep: Unit = {
     //print("---------------------------------------------------------------------- redone:" + undone)
     //if(undone) {
-      val vBoard = new Gameboard
-      vBoard.gameboard = controller.board.gameboard.clone()
-      controller.board.gameboard = controller.board.oldgb.clone()
-      controller.board.oldgb = vBoard.gameboard.clone()
-      controller.board.round += 1
+      var vBoard = new Gameboard(Array(14))
+      vBoard = controller.gameboard.copy()
+      controller.gameboard = controller.oldgb.copy()
+      controller.oldgb = vBoard.copy()
+      controller.round += 1
       print("redo \n")
       //undone = false
     //}

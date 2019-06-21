@@ -36,7 +36,7 @@ class Tui(controller: Controller) extends Observer {
 
 
   def checkPlayer(): Unit = {
-    val turn = controller.board.round % 2
+    val turn = controller.round % 2
     if (turn == 0) {
       print("\nSpieler " + Console.RED + "1 " + Console.RESET + "ist an der Reihe.")
     } else {
@@ -82,7 +82,7 @@ class Tui(controller: Controller) extends Observer {
   }
 
   def startTurn(): Unit = {
-    var turn = controller.board.round % 2
+    var turn = controller.round % 2
     if (turn == 0) {
       print("\nSpieler " + Console.RED + "1 " + Console.RESET + "ist an der Reihe.")
     } else {
@@ -127,10 +127,10 @@ class Tui(controller: Controller) extends Observer {
   def checkInputIFValid(index: Int): Boolean = index match {
     case x if 1 until 6 + 1 contains x =>
       var idx = index
-      if (controller.board.round % 2 == 1) {
+      if (controller.round % 2 == 1) {
         idx += 7
       }
-      if (controller.board.gameboard(idx) > 0) {
+      if (controller.gameboard.gb(idx) > 0) {
         true
       } else {
         false
@@ -162,11 +162,11 @@ class Tui(controller: Controller) extends Observer {
 
     val gameboardString = new Array[String](14)
     for (i <- gameboardString.indices) {
-      if (board.gameboard(i) < 10) {
-        gameboardString(i) = " " + board.gameboard(i)
+      if (board.gb(i) < 10) {
+        gameboardString(i) = " " + board.gb(i)
       }
       else {
-        gameboardString(i) = "" + board.gameboard(i)
+        gameboardString(i) = "" + board.gb(i)
       }
     }
     var s = ""
@@ -187,10 +187,10 @@ class Tui(controller: Controller) extends Observer {
       //controller.exit()
     }
     if (controller.p1win) {
-      print("Spieler 1 gewinnt mit " + controller.board.gameboard(7) + "Punkten!\n")
+      print("Spieler 1 gewinnt mit " + controller.board.gb(7) + "Punkten!\n")
       //controller.exit()
     } else if (controller.p2win) {
-      print("Spieler 2 gewinnt mit " + controller.board.gameboard(0) + "Punkten!\n")
+      print("Spieler 2 gewinnt mit " + controller.board.gb(0) + "Punkten!\n")
       //controller.exit()
     }
   }
