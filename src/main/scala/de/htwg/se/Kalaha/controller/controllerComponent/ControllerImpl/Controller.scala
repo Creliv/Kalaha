@@ -182,7 +182,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
       case e: IllegalArgumentException => print(e)
     }
   }
-  
+
   def reset(): Unit = {
     gameboard.boardInit(amountStones)
     round = 0
