@@ -31,9 +31,9 @@ trait ControllerInterface {
 
   def exit(): Unit
 
-  def save(): Try[Unit]
+  def save(): Unit
 
-  def load(): Try[Unit]
+  def load(): Unit
 
   def statusText(): String
 }

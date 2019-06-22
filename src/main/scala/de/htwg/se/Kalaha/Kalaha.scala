@@ -17,7 +17,5 @@ object Kalaha extends Observable{
                         case Success(_) => notifyObservers
                         case Failure(e) => println(e)
                 }
-
-
         }
 }

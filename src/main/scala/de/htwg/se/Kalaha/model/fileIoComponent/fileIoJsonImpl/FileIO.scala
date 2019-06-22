@@ -14,22 +14,25 @@ import scala.util._
 class FileIO extends FileIOInterface {
   var round = 0
 
-  override def load(controller: Controller): Try[Unit] = Try {
-    val source1: String = Source.fromFile("D:\\board.json").getLines.mkString
-    val json1: JsValue = Json.parse(source1)
-    loadRound(json1, controller) match {
-      case Some(v) => controller.round = v
-      case None => println("Error: Could not parse Json-File for <round>")
-    }
-    loadStones(json1, controller) match {
-      case Some(v) => controller.amountStones = v
-      case None => println("Error: Could not parse Json-File for <round>")
-    }
-    loadBoard(json1, controller) /*match {
+  override def load(controller: Controller): Try[Unit] = {
+    Try {
+      val source1: String = Source.fromFile("K:\\board.json").getLines.mkString
+      val json1: JsValue = Json.parse(source1)
+      loadRound(json1, controller) match {
+        case Some(v) => controller.round = v
+        case None => println("Error: Could not parse Json-File for <round>")
+      }
+      loadStones(json1, controller) match {
+        case Some(v) => controller.amountStones = v
+        case None => println("Error: Could not parse Json-File for <round>")
+      }
+      loadBoard(json1, controller) /*match {
       case Some(v) => controller.gameboard.setBoard(v)
       case None => println("Error: Could not parse Json-File for <gameboard>")
     }*/
-    controller.notifyObservers
+      controller.notifyObservers
+    }
+
   }
 
 
@@ -73,10 +76,12 @@ class FileIO extends FileIOInterface {
     }
   }
 
-  override def save(controller: Controller, board: Gameboard): Try[Unit] = Try {
-    val pw = new PrintWriter(new File("D:\\board.json"))
-    pw.write(Json.prettyPrint(toJson(controller)).toString)
-    pw.close()
+  override def save(controller: Controller, board: Gameboard): Try[Unit] = {
+    Try {
+      val pw = new PrintWriter(new File("L:\\board.json"))
+      pw.write(Json.prettyPrint(toJson(controller)).toString)
+      pw.close()
+    }
   }
 
   def toJson(controller: Controller): JsValue = {

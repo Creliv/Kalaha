@@ -45,7 +45,6 @@ class UndoManagerImpl(controller: Controller) extends UndoManager {
     Some(setBoardPieces)
   }
 
-
   override def redoMove: Option[Unit] = {
     Some(setBoardPieces)
   }

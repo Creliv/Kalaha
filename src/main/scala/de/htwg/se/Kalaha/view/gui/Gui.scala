@@ -72,10 +72,10 @@ class Gui(controller: Controller) extends Frame with Observer {
         //redraw()
       })
       contents += new MenuItem(Action("Als JSON speichern") {
-        controller.save
+        Try(controller.save)
       })
       contents += new MenuItem(Action("Spiel laden") {
-        controller.load
+        Try(controller.load)
       })
       contents += new MenuItem(Action("Spielregeln") {
         help()
@@ -105,12 +105,12 @@ class Gui(controller: Controller) extends Frame with Observer {
       mnemonic = Key.O
       contents += new MenuItem(Action("Mit 4 Kugeln starten") {
         controller.updateStones(4)
-        controller.reset
+        reset
         redraw()
       })
       contents += new MenuItem(Action("Mit 6 Kugeln starten") {
         controller.updateStones(6)
-        controller.reset
+        reset
         redraw()
       })
     }

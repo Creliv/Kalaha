@@ -47,12 +47,12 @@ class Controller() extends Observable with ControllerInterface with Publisher{
   }
 
   def controllerInit(): Future[Unit] = {
-      updateStones(6)
-      gameboard.boardInit(boardArray).getOrElse(new Exception("Error: Could not initialize board!"))
-      Future.successful(this.gui = new Gui(this))
-      //Future.successful(this.tui = new Tui(this))
-      //Future.successful(tui.startGame())
-      Future.successful(this.gameStatus = NEW)
+    updateStones(6)
+    gameboard.boardInit(boardArray).getOrElse(new Exception("Error: Could not initialize board!"))
+    Future.successful(gui = new Gui(this))
+    Future.successful(tui = new Tui(this))
+    Future.successful(tui.startGame())
+    Future.successful(this.gameStatus = NEW)
   }
 
   def updateStones(x: Int): Unit = {
@@ -136,7 +136,6 @@ class Controller() extends Observable with ControllerInterface with Publisher{
       undone = true
       notifyObservers
     }
-
   }
 
   def redo(): Try[Unit] = Try {
@@ -149,12 +148,14 @@ class Controller() extends Observable with ControllerInterface with Publisher{
       undone = false
       notifyObservers
     }
-
   }
 
   def reset(): Unit = {
     gameboard.boardInit(amountStones) match {
-      case Some(_) => println("success: reset board")//gameStatus = RESET
+      case Some(_) => {
+        println("success: reset board")
+        gameStatus = RESET
+      }
       case None => println("Error: Could not initialize board1!")
     }
     round = 0
@@ -196,17 +197,18 @@ class Controller() extends Observable with ControllerInterface with Publisher{
 
   def exit(): Unit = sys.exit(0)
 
-  def save: Try[Unit] = Try[Unit] {
+  def save: Unit = Try[Unit] {
     fileIO.save(this, gameboard) match {
       case Success(_) => println("Successfully written to Json-File!")
-      case Failure(t) => println(s"Error: Could not save to Json-File")
+      case Failure(e) => println(e)
     }
   }
-  def load: Try[Unit] = Try[Unit] {
+  def load: Unit = Try[Unit] {
     fileIO.load(this) match {
-      case Success(_) => println("Successfully loaded gamestate from Json-File!")
-      case Failure(_) => println(s"Error: Could not load gamestate from Json-File")
+      case Success(v) => println("Successfully loaded gamestate from Json-File!")
+      case Failure(e) => println(e)
     }
   }
+  //TODO doesnt get updated properly
   def statusText: String = GameStatus.message(gameStatus)
 }
