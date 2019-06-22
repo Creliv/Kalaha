@@ -13,7 +13,7 @@ trait ControllerInterface {
 
   def updateStones(x: Int): Unit
 
-  def move(inputIndex: Int): Unit
+  def move(inputIndex: Int): Future[Unit]
 
   def collectEnemyStones(last: Int): Unit
 

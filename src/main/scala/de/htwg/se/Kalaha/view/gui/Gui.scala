@@ -9,6 +9,7 @@ import scala.language.postfixOps
 import scala.swing._
 import scala.swing.event._
 import scala.util._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class Gui(controller: Controller) extends Frame with Observer {
 
@@ -155,7 +156,10 @@ class Gui(controller: Controller) extends Frame with Observer {
             if(controller.gameboard.gb(y + 1) == 0) {
               val dia = Dialog.showConfirmation(contents.head, "Feld darf nicht leer sein", "Hinweis", optionType = Dialog.Options.Default)
             } else {
-              controller.move(y + 1)
+              controller.move(y + 1).onComplete {
+                case Success(v) => println("")
+                case Failure(e) => print(e)
+              }
               redraw()
             }
           }
@@ -167,7 +171,10 @@ class Gui(controller: Controller) extends Frame with Observer {
             if(controller.gameboard.gb(13 - y) == 0) {
               val dia = Dialog.showConfirmation(contents.head, "Feld darf nicht leer sein", "Hinweis", optionType = Dialog.Options.Default)
             } else {
-              controller.move(13 - y)
+              controller.move(13 - y).onComplete {
+                case Success(v) => println("")
+                case Failure(e) => print(e)
+              }
               redraw()
             }
           }

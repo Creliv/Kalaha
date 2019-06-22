@@ -11,11 +11,12 @@ import de.htwg.se.Kalaha.view.tui.Tui
 import scala.swing.Publisher
 import scala.util._
 import scala.concurrent._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class Controller() extends Observable with ControllerInterface with Publisher{
   val stones: Int = 6
   val boardArray = Array(0, stones, stones, stones, stones, stones, stones, 0, stones, stones, stones, stones, stones, stones)
-  var gameboard = new Gameboard(Array(0,0,0,0,0,0,0,0,0,0,0,0,0,0))
+  val gameboard = new Gameboard(Array(0,0,0,0,0,0,0,0,0,0,0,0,0,0))
   val oldgb = new Gameboard(Array(0,0,0,0,0,0,0,0,0,0,0,0,0,0))
   val vBoard = new Gameboard(Array(0,0,0,0,0,0,0,0,0,0,0,0,0,0))
 
@@ -47,23 +48,19 @@ class Controller() extends Observable with ControllerInterface with Publisher{
   }
 
   def controllerInit(): Future[Unit] = {
-    updateStones(6)
-    gameboard.boardInit(boardArray) match {
-      case Some(_) => {
-        Future.successful(this.gui = new Gui(this))
-        //Future.successful(this.tui = new Tui(this))
-        //Future.successful(tui.startGame())
-        Future.successful(this.gameStatus = NEW)
-      }
-      case None => Future.failed(new Exception("Error: Could not initialize board2!"))
-    }
+      updateStones(6)
+      gameboard.boardInit(boardArray).getOrElse(new Exception("Error: Could not initialize board!"))
+      Future.successful(this.gui = new Gui(this))
+      //Future.successful(this.tui = new Tui(this))
+      //Future.successful(tui.startGame())
+      Future.successful(this.gameStatus = NEW)
   }
 
   def updateStones(x: Int): Unit = {
     amountStones = x
   }
 
-  def move(inputIndex: Int): Unit = {
+  def move(inputIndex: Int): Future[Unit] = {
     var index = inputIndex
     var last = 0
     //print("index = " + index + "\n")
@@ -100,7 +97,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
     notifyObservers
     checkExtra(last)
 
-    round += 1
+    Future.successful(this.round += 1)
   }
 
   def collectEnemyStones(last: Int): Unit = {
@@ -140,7 +137,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
       undone = true
       notifyObservers
     }
-    notifyObservers
+
   }
 
   def redo(): Try[Unit] = Try {
@@ -151,8 +148,9 @@ class Controller() extends Observable with ControllerInterface with Publisher{
       undoManager.redoMove.get
       round += 1
       undone = false
+      notifyObservers
     }
-    notifyObservers
+
   }
 
   def reset(): Unit = {
@@ -166,30 +164,19 @@ class Controller() extends Observable with ControllerInterface with Publisher{
 
   def checkWin(): Unit = {
     var x: Int = 0
-    for (i <- 1 until 6 + 1) {
-      //print("i: " + i)
-      x += gameboard.gb(i)
-    }
+    for (i <- 1 until 6 + 1) x += gameboard.gb(i)
     var y: Int = 0
-    for (i <- 1 until 6 + 1) {
-      //print("i2: " + (i + 7))
-      y += gameboard.gb(i + 7)
-    }
+    for (i <- 1 until 6 + 1) y += gameboard.gb(i + 7)
     if (x == 0 || y == 0) win()
   }
 
   def win(): Unit = {
     var x: Int = 0
-    for (i <- 1 until 6 + 1) {
-      x += gameboard.gb(i)
-    }
+    for (i <- 1 until 6 + 1) x += gameboard.gb(i)
     var y: Int = 0
-    for (i <- 1 until 6 + 1)
-      y += gameboard.gb(i + p1)
-
+    for (i <- 1 until 6 + 1) y += gameboard.gb(i + p1)
     gameboard.gb(p1) += x
     gameboard.gb(p2) += y
-
     match {
       case a if gameboard.gb(p1) > gameboard.gb(p2) =>
         //print("P1: " + board.gameboard(p1) + " P2: " + board.gameboard(2) + "\n")
@@ -205,6 +192,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
         p1win = true
     }
     gameStatus = WON
+    notifyObservers
   }
 
   def exit(): Unit = sys.exit(0)
