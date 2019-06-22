@@ -1,6 +1,5 @@
 package de.htwg.se.Kalaha.model.gameboardController.GameboardImpl
 
-import de.htwg.se.Kalaha.controller.controllerComponent.ControllerImpl.Controller
 import de.htwg.se.Kalaha.model.gameboardController.GameboardInterface
 
 case class Gameboard(gb: Array[Int]) extends GameboardInterface {

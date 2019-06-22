@@ -16,7 +16,7 @@ class FileIO extends FileIOInterface {
 
   override def load(controller: Controller): Try[Unit] = {
     Try {
-      val source1: String = Source.fromFile("K:\\board.json").getLines.mkString
+      val source1: String = Source.fromFile("D:\\board.json").getLines.mkString
       val json1: JsValue = Json.parse(source1)
       loadRound(json1, controller) match {
         case Some(v) => controller.round = v
@@ -26,15 +26,10 @@ class FileIO extends FileIOInterface {
         case Some(v) => controller.amountStones = v
         case None => println("Error: Could not parse Json-File for <round>")
       }
-      loadBoard(json1, controller) /*match {
-      case Some(v) => controller.gameboard.setBoard(v)
-      case None => println("Error: Could not parse Json-File for <gameboard>")
-    }*/
+      loadBoard(json1, controller)
       controller.notifyObservers
     }
-
   }
-
 
   def loadRound(json: JsValue, controller: Controller): Option[Int] = {
     try {
@@ -52,20 +47,6 @@ class FileIO extends FileIOInterface {
     }
   }
 
-  /*def loadBoard(json: JsValue, controller: Controller): Option[Array[Int]] = {
-
-    val board = (json \ "gameboard" \ "board").get.toString()
-    val jsonList: List[JsValue] = Json.parse(board).as[List[JsValue]]
-
-    for (feld <- jsonList) {
-      for (i: Int <- 0 to 13) {
-        arr(i) = (feld \ i.toString).get.toString().toInt
-      }
-    }
-    Some(arr)
-    None
-  }*/
-
   def loadBoard(json: JsValue, controller: Controller): Unit = {
     val board = (json \ "gameboard" \ "board").get.toString()
     val jsonList: List[JsValue] = Json.parse(board).as[List[JsValue]]
@@ -76,9 +57,9 @@ class FileIO extends FileIOInterface {
     }
   }
 
-  override def save(controller: Controller, board: Gameboard): Try[Unit] = {
+  override def save(controller: Controller): Try[Unit] = {
     Try {
-      val pw = new PrintWriter(new File("L:\\board.json"))
+      val pw = new PrintWriter(new File("D:\\board.json"))
       pw.write(Json.prettyPrint(toJson(controller)).toString)
       pw.close()
     }

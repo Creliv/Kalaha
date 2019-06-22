@@ -4,7 +4,7 @@ import de.htwg.se.Kalaha.controller.controllerComponent.{ControllerInterface, Ga
 import de.htwg.se.Kalaha.controller.controllerComponent.GameStatus._
 import de.htwg.se.Kalaha.model.gameboardController.GameboardImpl.Gameboard
 import de.htwg.se.Kalaha.model.fileIoComponent.fileIoJsonImpl.FileIO
-import de.htwg.se.Kalaha.util.{Observable, UndoManager, UndoManagerImpl}
+import de.htwg.se.Kalaha.util.{Observable, UndoManagerImpl}
 import de.htwg.se.Kalaha.view.gui.Gui
 import de.htwg.se.Kalaha.view.tui.Tui
 
@@ -60,43 +60,46 @@ class Controller() extends Observable with ControllerInterface with Publisher{
   }
 
   def move(inputIndex: Int): Future[Unit] = {
-    var index = inputIndex
-    var last = 0
-    //print("index = " + index + "\n")
-    val turn = round % 2
-    //print("Turn = " + turn + "\n")
-    for (i <- 0 to 13) {
-      oldgb.gb(i) = gameboard.gb(i)
-    }
-    val countStonesInMuld: Int = gameboard.gb(index)
-    //print("Balls = " + countStonesInMuld + "\n")
-    gameboard.gb(index) = 0
-    for (i <- 1 until countStonesInMuld + 1) {
-      if ((turn == 0 && (index + i) % 14 == 0) || (turn == 1 && (index + i) % 14 == p1)) {
-        //print("turn: " + round % 2 + " i = " + (index + i) + " x = " + countStonesInMuld + " skip\n")
-        //check if last hole > gameboard
-        if (index + i >= gameboard.gb.length) {
-          val y: Int = (index + i - gameboard.gb.length) % 14
-          gameboard.gb(y + 1) += 1
-          index += 1
-        } else {
-          gameboard.gb(index + i) += 1
-        }
-      } else {
-        if (index + i >= gameboard.gb.length) {
-          val y: Int = (index + i - gameboard.gb.length) % 14
-          gameboard.gb(y) += 1
-        } else {
-          gameboard.gb(index + i) += 1
-        }
-      }
-      if (i == countStonesInMuld) last = (index + i) % 14
-    }
-    undone = false
-    notifyObservers
-    checkExtra(last)
+    Future {
+      var index = inputIndex
 
-    Future.successful(this.round += 1)
+      var last = 0
+      //print("index = " + index + "\n")
+      val turn = round % 2
+      //print("Turn = " + turn + "\n")
+      for (i <- 0 to 13) {
+        oldgb.gb(i) = gameboard.gb(i)
+      }
+      val countStonesInMuld: Int = gameboard.gb(index)
+      //print("Balls = " + countStonesInMuld + "\n")
+      gameboard.gb(index) = 0
+      for (i <- 1 until countStonesInMuld + 1) {
+        if ((turn == 0 && (index + i) % 14 == 0) || (turn == 1 && (index + i) % 14 == p1)) {
+          //print("turn: " + round % 2 + " i = " + (index + i) + " x = " + countStonesInMuld + " skip\n")
+          //check if last hole > gameboard
+          if (index + i >= gameboard.gb.length) {
+            val y: Int = (index + i - gameboard.gb.length) % 14
+            gameboard.gb(y + 1) += 1
+            index += 1
+          } else {
+            gameboard.gb(index + i) += 1
+          }
+        } else {
+          if (index + i >= gameboard.gb.length) {
+            val y: Int = (index + i - gameboard.gb.length) % 14
+            gameboard.gb(y) += 1
+          } else {
+            gameboard.gb(index + i) += 1
+          }
+        }
+        if (i == countStonesInMuld) last = (index + i) % 14
+      }
+      undone = false
+      notifyObservers
+      checkExtra(last)
+
+      this.round += 1
+    }
   }
 
   def collectEnemyStones(last: Int): Unit = {
@@ -198,7 +201,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
   def exit(): Unit = sys.exit(0)
 
   def save: Unit = Try[Unit] {
-    fileIO.save(this, gameboard) match {
+    fileIO.save(this) match {
       case Success(_) => println("Successfully written to Json-File!")
       case Failure(e) => println(e)
     }

@@ -8,6 +8,6 @@ import scala.util.Try
 trait FileIOInterface {
 
   def load(controller: Controller): Try[Unit]
-  def save(controller: Controller, board:Gameboard): Try[Unit]
+  def save(controller: Controller): Try[Unit]
 
 }
