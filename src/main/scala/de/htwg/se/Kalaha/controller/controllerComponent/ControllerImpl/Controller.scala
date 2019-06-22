@@ -4,7 +4,7 @@ import de.htwg.se.Kalaha.controller.controllerComponent.{ControllerInterface, Ga
 import de.htwg.se.Kalaha.controller.controllerComponent.GameStatus._
 import de.htwg.se.Kalaha.model.gameboardController.GameboardImpl.Gameboard
 import de.htwg.se.Kalaha.model.fileIoComponent.fileIoJsonImpl.FileIO
-import de.htwg.se.Kalaha.util.{Observable, UndoManager}
+import de.htwg.se.Kalaha.util.{Observable, UndoManager, UndoManagerImpl}
 import de.htwg.se.Kalaha.view.gui.Gui
 import de.htwg.se.Kalaha.view.tui.Tui
 
@@ -26,7 +26,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
   var p2win = false
   val p1 = 7
   val p2 = 0
-  private val undoManager = new UndoManager
+  private val undoManager = new UndoManagerImpl(this)
   val fileIO = new FileIO
   var round = 0
 
@@ -140,51 +140,31 @@ class Controller() extends Observable with ControllerInterface with Publisher{
 
   }
 
-  def undo(): Unit = {
-    try{
-      if (undone) {
-        throw new IllegalArgumentException("Es ist nur möglich einen Zug rückgängig zu machen")
-      } else {
-        gameStatus = UNDO
-        //undoManager.undoStep
-        for (i <- 0 to 13) {
-          vBoard.gb(i) = gameboard.gb(i)
-          gameboard.gb(i) = oldgb.gb(i)
-          oldgb.gb(i) = vBoard.gb(i)
-        }
-        round -= 1
-        undone = true
-        notifyObservers
-        print("undo \n")
-
-      }
+  def undo(): Try[Unit] = Try {
+    if (undone) {
+      throw new IllegalArgumentException("Es ist nur möglich einen Zug rückgängig zu machen1")
+    } else {
+      gameStatus = UNDO
+      undoManager.undoMove.get
+      round -= 1
+      undone = true
       notifyObservers
-    } catch {
-      case e: IllegalArgumentException => print(e)
+      print("undo \n")
     }
+    notifyObservers
   }
 
-  def redo(): Unit = {
-    try {
-      if(!undone) {
-        throw new IllegalArgumentException("Es ist nur möglich einen Zug vorwärts zu machen")
-      } else {
-        gameStatus = REDO
-        //undoManager.redoStep
-        for (i <- 0 to 13) {
-          vBoard.gb(i) = gameboard.gb(i)
-          gameboard.gb(i) = oldgb.gb(i)
-          oldgb.gb(i) = vBoard.gb(i)
-        }
-        round += 1
-        print("redo \n")
-        undone = false
-
-      }
-      notifyObservers
-    } catch {
-      case e: IllegalArgumentException => print(e)
+  def redo(): Try[Unit] = Try {
+    if(!undone) {
+      throw new IllegalArgumentException("Es ist nur möglich einen Zug vorwärts zu machen1")
+    } else {
+      gameStatus = REDO
+      undoManager.redoMove.get
+      round += 1
+      print("redo \n")
+      undone = false
     }
+    notifyObservers
   }
 
   def reset(): Unit = {

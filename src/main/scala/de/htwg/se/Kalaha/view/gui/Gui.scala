@@ -8,6 +8,7 @@ import de.htwg.se.Kalaha.util.{Observer, Point}
 import scala.language.postfixOps
 import scala.swing._
 import scala.swing.event._
+import scala.util._
 
 class Gui(controller: Controller) extends Frame with Observer {
 
@@ -85,11 +86,17 @@ class Gui(controller: Controller) extends Frame with Observer {
     contents += new Menu("Edit") {
       mnemonic = Key.E
       contents += new MenuItem(Action("Undo") {
-        controller.undo
+        controller.undo match {
+          case Success(_) => println("Successfully undone step")
+          case Failure(t) => println(s"Error: " + t)
+        }
         //redraw()
       })
       contents += new MenuItem(Action("Redo") {
-        controller.redo
+        controller.redo match {
+          case Success(_) => println("Successfully redone step")
+          case Failure(t) => println(s"Error: " + t)
+        }
         //redraw()
       })
     }

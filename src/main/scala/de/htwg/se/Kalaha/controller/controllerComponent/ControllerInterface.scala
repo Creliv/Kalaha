@@ -16,9 +16,9 @@ trait ControllerInterface {
 
   def checkExtra(last: Int): Unit
 
-  def undo(): Unit
+  def undo(): Try[Unit]
 
-  def redo(): Unit
+  def redo(): Try[Unit]
 
   def reset(): Unit
 
