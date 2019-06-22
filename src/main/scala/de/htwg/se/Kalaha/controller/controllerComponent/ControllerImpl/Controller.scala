@@ -35,18 +35,20 @@ class Controller() extends Observable with ControllerInterface with Publisher{
 
   def controllerInit(amountStonesStart: Int): Unit = {
     amountStones = amountStonesStart
-    gameboard.boardInit(amountStonesStart)
-    print(boardArray, "---------------------------------")
+    gameboard.boardInit(amountStonesStart) match {
+      case Some(_) => gameStatus = NEW
+      case None => println("Error: Could not initialize board1!")
+    }
     // notifyObservers
-    gameStatus = NEW
     //publish()
   }
 
   def controllerInit(): Unit = {
     updateStones(6)
-    //println(gameboard)
-    gameboard.boardInit(boardArray)
-    //println(gameboard)
+    gameboard.boardInit(boardArray) match {
+      case Some(_) => gameStatus = NEW
+      case None => println("Error: Could not initialize board2!")
+    }
     val gui = new Gui(this)
     //val tui = new Tui(this)
     //tui.startGame()
@@ -62,7 +64,6 @@ class Controller() extends Observable with ControllerInterface with Publisher{
     //print("index = " + index + "\n")
     val turn = round % 2
     //print("Turn = " + turn + "\n")
-    println("TESTTESTTEST")
     for (i <- 0 to 13) {
       oldgb.gb(i) = gameboard.gb(i)
     }
@@ -144,6 +145,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
       if (undone) {
         throw new IllegalArgumentException("Es ist nur möglich einen Zug rückgängig zu machen")
       } else {
+        gameStatus = UNDO
         //undoManager.undoStep
         for (i <- 0 to 13) {
           vBoard.gb(i) = gameboard.gb(i)
@@ -154,7 +156,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
         undone = true
         notifyObservers
         print("undo \n")
-        gameStatus = UNDO
+
       }
       notifyObservers
     } catch {
@@ -167,6 +169,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
       if(!undone) {
         throw new IllegalArgumentException("Es ist nur möglich einen Zug vorwärts zu machen")
       } else {
+        gameStatus = REDO
         //undoManager.redoStep
         for (i <- 0 to 13) {
           vBoard.gb(i) = gameboard.gb(i)
@@ -176,7 +179,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
         round += 1
         print("redo \n")
         undone = false
-        gameStatus = REDO
+
       }
       notifyObservers
     } catch {
@@ -185,7 +188,10 @@ class Controller() extends Observable with ControllerInterface with Publisher{
   }
 
   def reset(): Unit = {
-    gameboard.boardInit(amountStones)
+    gameboard.boardInit(amountStones) match {
+      case Some(_) => println("success: reset board")//gameStatus = RESET
+      case None => println("Error: Could not initialize board1!")
+    }
     round = 0
     notifyObservers
   }
@@ -247,5 +253,5 @@ class Controller() extends Observable with ControllerInterface with Publisher{
       case Failure(_) => println(s"Error: Could not load gamestate from Json-File")
     }
   }
-  def statusText:String = GameStatus.message(gameStatus)
+  def statusText: String = GameStatus.message(gameStatus)
 }
