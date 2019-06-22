@@ -9,9 +9,6 @@ object Kalaha {
         var controller = injector.getInstance(classOf[ControllerInterface])
 
         def main(args: Array[String]): Unit = {
-                controller.controllerInit()
-                //val tui = new Tui(controller)
-                //tui.startGame()
-                //val gui = new Gui(controller)
+                controller.controllerInit().isCompleted
         }
 }

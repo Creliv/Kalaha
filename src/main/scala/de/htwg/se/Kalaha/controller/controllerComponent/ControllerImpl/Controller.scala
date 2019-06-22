@@ -10,6 +10,7 @@ import de.htwg.se.Kalaha.view.tui.Tui
 
 import scala.swing.Publisher
 import scala.util._
+import scala.concurrent._
 
 class Controller() extends Observable with ControllerInterface with Publisher{
   val stones: Int = 6
@@ -29,29 +30,33 @@ class Controller() extends Observable with ControllerInterface with Publisher{
   private val undoManager = new UndoManagerImpl(this)
   val fileIO = new FileIO
   var round = 0
+  var gui: Gui = _
+  var tui: Tui = _
 
   //val injector = Guice.createInjector(new GameboardModule)
   //val fileIo = injector.instance[FileIOInterface]
 
-  def controllerInit(amountStonesStart: Int): Unit = {
+  def controllerInit(amountStonesStart: Int): Future[Unit] = {
     amountStones = amountStonesStart
     gameboard.boardInit(amountStonesStart) match {
-      case Some(_) => gameStatus = NEW
-      case None => println("Error: Could not initialize board1!")
+      case Some(_) => Future.successful(this.gameStatus = NEW)
+      case None => Future.failed(new Exception("Error: Could not initialize board1!"))
     }
     // notifyObservers
     //publish()
   }
 
-  def controllerInit(): Unit = {
+  def controllerInit(): Future[Unit] = {
     updateStones(6)
     gameboard.boardInit(boardArray) match {
-      case Some(_) => gameStatus = NEW
-      case None => println("Error: Could not initialize board2!")
+      case Some(_) => {
+        Future.successful(this.gui = new Gui(this))
+        //Future.successful(this.tui = new Tui(this))
+        //Future.successful(tui.startGame())
+        Future.successful(this.gameStatus = NEW)
+      }
+      case None => Future.failed(new Exception("Error: Could not initialize board2!"))
     }
-    val gui = new Gui(this)
-    //val tui = new Tui(this)
-    //tui.startGame()
   }
 
   def updateStones(x: Int): Unit = {
@@ -89,11 +94,8 @@ class Controller() extends Observable with ControllerInterface with Publisher{
           gameboard.gb(index + i) += 1
         }
       }
-      if (i == countStonesInMuld) {
-        last = (index + i) % 14
-      }
+      if (i == countStonesInMuld) last = (index + i) % 14
     }
-
     undone = false
     notifyObservers
     checkExtra(last)
@@ -123,21 +125,9 @@ class Controller() extends Observable with ControllerInterface with Publisher{
   }
 
   def checkExtra(last: Int): Unit = {
-    //checkWin()
-    //print("checkExtra!\n")
-    if ((round % 2 == 1 && last == 0) || (round % 2 == 0 && last == 7)) {
-      //print("New Turn")
-      //tui.startTurn()
-      //notifyObservers
-
-      round -= 1
-      notifyObservers
-    }
-    if (gameboard.gb(last) == 1) {
-      collectEnemyStones(last)
-      notifyObservers
-    }
-
+    if ((round % 2 == 1 && last == 0) || (round % 2 == 0 && last == 7)) round -= 1
+    if (gameboard.gb(last) == 1) collectEnemyStones(last)
+    notifyObservers
   }
 
   def undo(): Try[Unit] = Try {
@@ -149,7 +139,6 @@ class Controller() extends Observable with ControllerInterface with Publisher{
       round -= 1
       undone = true
       notifyObservers
-      print("undo \n")
     }
     notifyObservers
   }
@@ -161,7 +150,6 @@ class Controller() extends Observable with ControllerInterface with Publisher{
       gameStatus = REDO
       undoManager.redoMove.get
       round += 1
-      print("redo \n")
       undone = false
     }
     notifyObservers

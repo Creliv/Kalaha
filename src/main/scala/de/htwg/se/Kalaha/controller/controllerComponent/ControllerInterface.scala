@@ -1,12 +1,15 @@
 package de.htwg.se.Kalaha.controller.controllerComponent
 
+import de.htwg.se.Kalaha.view.gui.Gui
+
 import scala.util._
+import scala.concurrent._
 
 trait ControllerInterface {
 
-  //def controllerInit(amountStonesStart: Int): Unit
+  def controllerInit(amountStonesStart: Int): Future[Unit]
 
-  def controllerInit(): Unit
+  def controllerInit(): Future[Unit]
 
   def updateStones(x: Int): Unit
 

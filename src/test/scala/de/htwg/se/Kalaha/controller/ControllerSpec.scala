@@ -17,7 +17,7 @@ class ControllerSpec extends WordSpec with Matchers {
   
   "A controller" when {
     val controller = new Controller
-    controller.controllerInit(six)
+    controller.controllerInit(six).isCompleted
     val startFeld = "06666660666666"
         "in game general" should {
           "reset" in {
@@ -51,7 +51,7 @@ class ControllerSpec extends WordSpec with Matchers {
   }
   "A controller" when {
     val controller = new Controller
-    controller.controllerInit(six)
+    controller.controllerInit(six).isCompleted
     val startFeld = "06666660666666"
     "in game player 1" should {
       "move player 1" in {
@@ -74,7 +74,7 @@ class ControllerSpec extends WordSpec with Matchers {
   }
   "A controller" when {
     val controller = new Controller
-    controller.controllerInit(six)
+    controller.controllerInit(six).isCompleted
     val startFeld = "06666660666666"
     "in game player 2" should {
       controller.controllerInit(six)
@@ -198,7 +198,7 @@ class ControllerSpec extends WordSpec with Matchers {
       val controller = new Controller
       val startFeld6 = "06666660666666"
       "controllerInit"in{
-        controller.controllerInit(six)
+        controller.controllerInit(six).isCompleted
         controller.gameboard.toString should be(startFeld6)
       }
       "updateStones"in{
