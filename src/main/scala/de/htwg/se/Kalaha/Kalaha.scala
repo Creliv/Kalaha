@@ -4,7 +4,6 @@ import com.google.inject.Guice
 import de.htwg.se.Kalaha.controller.controllerComponent.ControllerInterface
 import de.htwg.se.Kalaha.util.Observable
 
-import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util._
 
