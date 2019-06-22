@@ -39,10 +39,9 @@ class Controller() extends Observable with ControllerInterface with Publisher{
 
   def controllerInit(amountStonesStart: Int): Future[Unit] = {
     amountStones = amountStonesStart
-    gameboard.boardInit(amountStonesStart) match {
-      case Some(_) => Future.successful(this.gameStatus = NEW)
-      case None => Future.failed(new Exception("Error: Could not initialize board1!"))
-    }
+    gameboard.boardInit(amountStonesStart).getOrElse(new Exception("Error: Could not initialize board!"))
+    Future.successful(this.gameStatus = NEW)
+    Future.failed(new Exception("Error: Could not initialize board1!"))
     // notifyObservers
     //publish()
   }
