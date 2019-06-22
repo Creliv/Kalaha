@@ -1,5 +1,7 @@
 package de.htwg.se.Kalaha.controller.controllerComponent
 
+import scala.util._
+
 trait ControllerInterface {
 
   //def controllerInit(amountStonesStart: Int): Unit
@@ -26,9 +28,9 @@ trait ControllerInterface {
 
   def exit(): Unit
 
-  def save(): Unit
+  def save(): Try[Unit]
 
-  def load(): Unit
+  def load(): Try[Unit]
 
   def statusText(): String
 }

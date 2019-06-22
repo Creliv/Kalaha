@@ -9,6 +9,7 @@ import de.htwg.se.Kalaha.view.gui.Gui
 import de.htwg.se.Kalaha.view.tui.Tui
 
 import scala.swing.Publisher
+import scala.util._
 
 class Controller() extends Observable with ControllerInterface with Publisher{
   val stones: Int = 6
@@ -233,7 +234,18 @@ class Controller() extends Observable with ControllerInterface with Publisher{
   }
 
   def exit(): Unit = sys.exit(0)
-  def save: Unit = fileIO.save(this, gameboard)
-  def load: Unit = fileIO.load(this)
+
+  def save: Try[Unit] = Try[Unit] {
+    fileIO.save(this, gameboard) match {
+      case Success(_) => println("Successfully written to Json-File!")
+      case Failure(t) => println(s"Error: Could not save to Json-File")
+    }
+  }
+  def load: Try[Unit] = Try[Unit] {
+    fileIO.load(this) match {
+      case Success(_) => println("Successfully loaded gamestate from Json-File!")
+      case Failure(_) => println(s"Error: Could not load gamestate from Json-File")
+    }
+  }
   def statusText:String = GameStatus.message(gameStatus)
 }

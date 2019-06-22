@@ -14,7 +14,7 @@ case class Gameboard(gb: Array[Int]) extends GameboardInterface {
     for (i <- 1 until 7) {
       gb(i) = amountStonesStart
     }
-    for (i <- 8 until SIZE) {
+    for (i <- 8 until 14) {
       gb(i) = amountStonesStart
     }
   }
