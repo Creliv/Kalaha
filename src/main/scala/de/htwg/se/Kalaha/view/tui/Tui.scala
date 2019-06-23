@@ -77,16 +77,9 @@ class Tui(controller: Controller) extends Observer {
   }
 
 def startTurn(inputX: Int, inputY: Int): String = {
-  if (controller.checkPlayerTurn == true) {
-    controller.moveTui(inputX + 1, inputY).onComplete {
-      case Success(_) => //controller.round + 1
-      case Failure(e) => println(e)
-    }
-  } else {
-    controller.moveTui(inputX - 1, inputY).onComplete {
-      case Success(_) => //controller.round + 1
-      case Failure(e) => println(e)
-    }
+  controller.moveTui(inputX, inputY).onComplete {
+    case Success(_) => //controller.round + 1
+    case Failure(e) => println(e)
   }
   showGameboard()
 }

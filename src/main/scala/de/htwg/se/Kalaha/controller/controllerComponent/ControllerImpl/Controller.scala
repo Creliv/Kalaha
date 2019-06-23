@@ -87,18 +87,16 @@ class Controller() extends Observable with ControllerInterface with Publisher{
 
   def moveTui(inputX: Int, inputY: Int): Future[Unit] = {
     Future {
-
-      //TODO take "coordinates" X Y from GUI/TUI to move and check move
       var index = inputY
       //var index = 0
       var turn = round % 2
 
       print(inputX)
       // turn >> playerTurn: Boolean
-      if (inputX == 0 && turn == 1) {
-        index = inputY + 7
+      if (inputX - 1== 0 && turn == 1) {
+        index = inputY + 8
         doMove(index)
-      } else if (inputX == 1 && turn == 0) {
+      } else if (inputX + 1== 1 && turn == 0) {
         index = inputY + 1
         doMove(index)
       } else {
