@@ -3,213 +3,219 @@ package de.htwg.se.Kalaha.view.tui
 import de.htwg.se.Kalaha.controller.controllerComponent.ControllerImpl.Controller
 import de.htwg.se.Kalaha.util.Observer
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.{Failure, Success}
+
 class Tui(controller: Controller) extends Observer {
-  val four = 4
   controller.addObserver(this)
 
-  def startGame(): Unit = {
-    welcomeMsg()
-    //print("\nSpieler " + Console.RED + "1 " + Console.RESET + "ist an der Reihe.") // player
-    showGameboard()
-    navigate()
-    showGameboard()
-  }
-
-  def askForAmountStonesStart(): Unit = {
-    print("\nfour oder 6 Steine? : ")
-    var input = 0
-    try {
-      input = readUserInput()
-    } catch {
-      case e: NumberFormatException =>
-        print("\nBitte richtige Werte angeben.")
-        askForAmountStonesStart()
-    }
-    input match {
-      case 4 => controller.controllerInit(four)
-      case 6 => controller.controllerInit(6)
-      case _ =>
-        print("\nBitte richtige Werte angeben.")
-        askForAmountStonesStart()
-    }
-  }
-
-
-  def checkPlayer(): Unit = {
-    val turn = controller.round % 2
-    if (turn == 0) {
-      print("\nSpieler " + Console.RED + "1 " + Console.RESET + "ist an der Reihe.")
-    } else {
-      print("\nSpieler " + Console.BLUE + "2 " + Console.RESET + "ist an der Reihe.")
-    }
-  }
-
-  def navigate(): Unit = {
-    checkPlayer()
-    printHelp()
+  def startGame: Unit = {
     var input = ""
-    try {
+    welcomeMsg()
+    print(showGameboard)
+    print(printHelp())
+
+    do {
       input = scala.io.StdIn.readLine()
-    } catch {
-      case _: Throwable => print("Felher beim lesen")
-    }
+      inputFct(input)
+
+    } while (input != "exit")
+  }
+
+  //TODO parse moveinput
+  def inputFct(input: String) = {
+    checkPlayer
     input match {
-      case "option" => askForAmountStonesStart()
-      case "help" => help()
-      case "p" => startTurn()
-      case "undo" => {
-        try {
-          controller.undo
-        } catch {
-          case e: Throwable => print(e)
-        }
+      case "option" => askForAmountStonesStart
+      case "help" => println(help)
+      case "show" => println(showGameboard)
+      case "undo" => controller.undo match {
+        case Success(_) => println("Successfully undone step")
+        case Failure(t) => println("Error: " + t)
       }
-      case "redo" => {
-        try {
-          controller.redo
-        } catch {
-          case e: Throwable => print(e)
-        }
+      case "redo" => controller.redo match {
+        case Success(_) => println("Successfully redone step")
+        case Failure(t) => println("Error: " + t)
       }
       case "reset" => controller.reset
       case "exit" => controller.exit
-      case "show" => showGameboard()
-      case _ => {
-        print("Falsche Eingabe\n")
+      case p if input.startsWith("p") && input.length <= 3 => {
+        //println(startTurn(input.charAt(1).toString.toInt))
+        print(startTurn(input.charAt(1).toString.toInt, input.charAt(2).toString.toInt))
       }
+      case _ => println("Falsche Eingabe!")
     }
-    navigate()
   }
 
-  def startTurn(): Unit = {
-    var turn = controller.round % 2
+  def askForAmountStonesStart = {
+    print("\nfour oder 6 Steine? : ")
+    var input = ""
+    input = scala.io.StdIn.readLine()
+    input match {
+      case "4" => {
+        controller.updateStones(4)
+        controller.reset()
+      }
+      case "6" => {
+        controller.updateStones(6)
+        controller.reset()
+      }
+      case _ =>
+        "\nEs ist nur moeglich mit 4 oder 6 Steinen zu starten."
+    }
+  }
+
+  def checkPlayer: String = {
+    val turn = controller.round % 2
+    var str = ""
     if (turn == 0) {
-      print("\nSpieler " + Console.RED + "1 " + Console.RESET + "ist an der Reihe.")
+      str += "\nSpieler " + Console.RED + "1 " + Console.RESET + "ist an der Reihe.\n"
     } else {
-      print("\nSpieler " + Console.BLUE + "2 " + Console.RESET + "ist an der Reihe.")
+      str += "\nSpieler " + Console.BLUE + "2 " + Console.RESET + "ist an der Reihe.\n"
     }
-    print("\nWähle eine Mulde : ")
-
-    var input = 0
-    try {
-      input = readUserInput()
-    } catch {
-      case e: NumberFormatException =>
-        print("\nBitte Zahlenwerte angeben.")
-        startTurn()
-    }
-
-    checkInputIFValid(input) match {
-      case false =>
-        print("\nBitte richtige Werte angeben.")
-        startTurn()
-      case true =>
-        if (turn == 1) {
-          input += 7
-        }
-        controller.move(input)
-    }
-    showGameboard()
-    navigate()
+    str
   }
 
-  def readUserInput(): Int = {
-    val a = scala.io.StdIn.readInt()
-    print("The value of a is " + a)
-    a
+def startTurn(inputX: Int, inputY: Int): String = {
+  if (controller.checkPlayerTurn == true) {
+    controller.moveTui(inputX + 1, inputY).onComplete {
+      case Success(_) => //controller.round + 1
+      case Failure(e) => println(e)
+    }
+  } else {
+    controller.moveTui(inputX - 1, inputY).onComplete {
+      case Success(_) => //controller.round + 1
+      case Failure(e) => println(e)
+    }
   }
+  showGameboard()
+}
 
-  /** *
-    * checkInputIFValid
-    *
-    * @param index userinput
-    */
-  def checkInputIFValid(index: Int): Boolean = index match {
-    case x if 1 until 6 + 1 contains x =>
-      var idx = index
-      if (controller.round % 2 == 1) {
-        idx += 7
+  /*var turn = controller.round % 2
+  if (turn == 0) {
+    print("\nSpieler " + Console.RED + "1 " + Console.RESET + "ist an der Reihe.")
+  } else {
+    print("\nSpieler " + Console.BLUE + "2 " + Console.RESET + "ist an der Reihe.")
+  }
+  checkInputIFValid(input2) match {
+    case false =>
+      print("\nBitte richtige Werte angeben.")
+    case true =>
+      if (turn == 1) {
+        input2 += 7
       }
-      if (controller.gameboard.gb(idx) > 0) {
-        true
-      } else {
-        false
-      }
-    case _ => false
+      controller.move(input2)
   }
+  print(showGameboard)*/
 
-  def welcomeMsg(): Unit = {
-    var s = ""
-    s += "\n"
-    s += "Welcome to Kalaha!! :D\n" +
-      "Spielregeln: ....."
-    //TODO: Helpinfos und spielregeln
-    print(s)
-  }
 
-  def help(): Unit = {
-    print("je 6 (oder 4) Kugeln werden in die 12 kleinen Mulden gelegt \n\n Gewinner ist, wer bei Spielende die meisten Kugeln in seinem Kalaha hat.\n\n"
-      + "Wer am Zuge ist, leert eine seiner Mulden und verteilt die Kugeln, jeweils eine, reihum im Gegenuhrzeigersinn in die nachfolgenden Mulden. "
-      + "Dabei wird auch das eigene Kalaha gefüllt. Das Gegner Kalaha wird ausgelassen.\n\n"
-      + "Fällt die letzte Kugel ins eigene Kalaha, ist der Spieler nochmals am Zuge.\n\n"
-      + "Fällt die letzte Kugel in eine leere Mulde auf der eigenen Seite,  wird diese Kugel und alle Kugeln in der Gegner Mulde gegenüber, ins eigene Kalaha "
-      + "gelegt und der Gegner hat den nächsten Zug.\n\n"
-      + "Das Spiel ist beendet, wenn alle Mulden eines Spielers leer sind. Der Gegner bekommt dann alle Kugeln aus seinen Mulden in sein Kalaha.\n\n")
-  }
+def readUserInput(): Int = {
+  val a = scala.io.StdIn.readInt()
+  print("The value of a is " + a)
+  a
+}
 
-  def showGameboard(): Unit = {
-    val gameboardString = new Array[String](14)
-    for (i <- gameboardString.indices) {
-      if (controller.gameboard.gb(i) < 10) {
-        gameboardString(i) = " " + controller.gameboard.gb(i)
-      }
-      else {
-        gameboardString(i) = " " + controller.gameboard.gb(i)
-      }
+/** *
+  * checkInputIFValid
+  *
+  * @param index userinput
+  */
+// check for empty field MULDE
+def checkInputIFValid(index: Int): Boolean = index match {
+  case x if 1 to 6 contains x =>
+    var idx = index
+    if (controller.round % 2 == 1) {
+      idx += 7
     }
-    var s = ""
-    s += "\n"
-    s +=
-      Console.BLUE + "--------6----5----4----3----2----1-------\n" + Console.RESET +
-        Console.BLUE + "|    | " + Console.RESET + gameboardString(13) + " | " + gameboardString(12) + " | " + gameboardString(11) + " | " + gameboardString(10) + " | " + gameboardString(9) + " | " + gameboardString(8) + Console.RED + " |    |\n" + Console.RESET +
-        Console.BLUE + "| " + gameboardString(0) + " |" + Console.RESET + "-----------------------------" + Console.RED + "| " + gameboardString(7) + " |\n" + Console.RESET +
-        Console.BLUE + "|    | " + Console.RESET + gameboardString(1) + " | " + gameboardString(2) + " | " + gameboardString(3) + " | " + gameboardString(four) + " | " + gameboardString(5) + " | " + gameboardString(6) + Console.RED + " |    |\n" + Console.RESET +
-        Console.RED + "--------1----2----3----4----5----6-------\n" + Console.RESET
-    print(s)
-  }
-
-  def checkWin(): Unit = {
-    controller.checkWin()
-    if (controller.p2win && controller.p1win) {
-      print("Unentschieden!\n")
-      //controller.exit()
+    if (controller.gameboard.gb(idx) > 0) {
+      true
+    } else {
+      false
     }
-    if (controller.p1win) {
-      print("Spieler 1 gewinnt mit " + controller.gameboard.gb(7) + "Punkten!\n")
-      //controller.exit()
-    } else if (controller.p2win) {
-      print("Spieler 2 gewinnt mit " + controller.gameboard.gb(0) + "Punkten!\n")
-      //controller.exit()
+  case _ => false
+}
+
+def welcomeMsg(): Unit = {
+  var s = ""
+  s += "\n"
+  s += "Welcome to Kalaha!! :D\n" +
+    "Spielregeln: ....."
+  //TODO: Helpinfos und spielregeln
+  print(s)
+}
+
+def help: String = {
+  var str = ""
+  str += "je 6 (oder 4) Kugeln werden in die 12 kleinen Mulden gelegt \n\n Gewinner ist, wer bei Spielende die meisten Kugeln in seinem Kalaha hat.\n\n" +
+     "Wer am Zuge ist, leert eine seiner Mulden und verteilt die Kugeln, jeweils eine, reihum im Gegenuhrzeigersinn in die nachfolgenden Mulden. " +
+     "Dabei wird auch das eigene Kalaha gefüllt. Das Gegner Kalaha wird ausgelassen.\n\n" +
+     "Fällt die letzte Kugel ins eigene Kalaha, ist der Spieler nochmals am Zuge.\n\n" +
+     "Fällt die letzte Kugel in eine leere Mulde auf der eigenen Seite,  wird diese Kugel und alle Kugeln in der Gegner Mulde gegenüber, ins eigene Kalaha " +
+     "gelegt und der Gegner hat den nächsten Zug.\n\n" +
+     "Das Spiel ist beendet, wenn alle Mulden eines Spielers leer sind. Der Gegner bekommt dann alle Kugeln aus seinen Mulden in sein Kalaha.\n\n"
+  str
+}
+
+//TODO Return value changed from Unit to String for Webserver
+def showGameboard(): String = {
+  val gameboardString = new Array[String](14)
+  for (i <- gameboardString.indices) {
+    if (controller.gameboard.gb(i) < 10) {
+      gameboardString(i) = " " + controller.gameboard.gb(i)
+    }
+    else {
+      gameboardString(i) = " " + controller.gameboard.gb(i)
     }
   }
+  var s = ""
+  s += "\n"
+  //TODO remove color or color without Console.XXX
+  s +=
+    Console.BLUE + "--------5----4----3----2----1----0-------\n" + Console.RESET +
+      Console.BLUE + "|    | " + Console.RESET + gameboardString(13) + " | " + gameboardString(12) + " | " + gameboardString(11) + " | " + gameboardString(10) + " | " + gameboardString(9) + " | " + gameboardString(8) + Console.RED + " |    |\n" + Console.RESET +
+      Console.BLUE + "| " + gameboardString(0) + " |" + Console.RESET + "-----------------------------" + Console.RED + "| " + gameboardString(7) + " |\n" + Console.RESET +
+      Console.BLUE + "|    | " + Console.RESET + gameboardString(1) + " | " + gameboardString(2) + " | " + gameboardString(3) + " | " + gameboardString(4) + " | " + gameboardString(5) + " | " + gameboardString(6) + Console.RED + " |    |\n" + Console.RESET +
+      Console.RED + "--------0----1----2----3----4----5-------\n" + Console.RESET
+  s += "\n" + checkPlayer
+  s
+}
 
-  def printHelp(): Unit = {
-    print("\nMögliche Eingaben:\n")
-    print("     p => Zug des aktuellen Spielers starten\n")
-    print("     help => Spielregeln\n")
-    print("     option => Feld mit four oder 6 Kugeln\n")
-    print("     show => Anzeigen des Spielfelds\n")
-    print("     undo => Letzten Zug rückgängig machen\n")
-    print("     redo => Letzten Undo rückgängig machen\n")
-    print("     reset => Spielfeld auf Anfang zurücksetzten\n")
-    print("     exit => Beenden\n")
+def checkWin(): Unit = {
+  controller.checkWin()
+  if (controller.p2win && controller.p1win) {
+    print("Unentschieden!\n")
+    //controller.exit()
   }
-
-  override def update(): Unit = {
-    showGameboard()
-    printHelp()
-    //checkWin()
+  if (controller.p1win) {
+    print("Spieler 1 gewinnt mit " + controller.gameboard.gb(7) + "Punkten!\n")
+    //controller.exit()
+  } else if (controller.p2win) {
+    print("Spieler 2 gewinnt mit " + controller.gameboard.gb(0) + "Punkten!\n")
+    //controller.exit()
   }
+}
 
-  //ruft theoretisch nur funktionen auf
+def printHelp(): String = {
+  var str = ""
+  str +=
+  "\nMögliche Eingaben:\n" +
+  "     pXY => Zug des aktuellen Spielers starten (X: player1 = 0 / player2 = 1) (Y: Mulde (0-5)\n" +
+  "     help => Spielregeln\n" +
+  "     option => Feld mit four oder 6 Kugeln\n" +
+  "     show => Anzeigen des Spielfelds\n" +
+  "     undo => Letzten Zug rückgängig machen\n" +
+  "     redo => Letzten Undo rückgängig machen\n" +
+  "     reset => Spielfeld auf Anfang zurücksetzten\n" +
+  "     exit => Beenden\n"
+  str
+}
+
+override def update(): Unit = {
+  print(checkPlayer)
+  print(showGameboard)
+  print(printHelp())
+  //checkWin()
+}
+
+//ruft theoretisch nur funktionen auf
 }

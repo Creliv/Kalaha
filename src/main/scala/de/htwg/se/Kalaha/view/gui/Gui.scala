@@ -89,14 +89,14 @@ class Gui(controller: Controller) extends Frame with Observer {
       contents += new MenuItem(Action("Undo") {
         controller.undo match {
           case Success(_) => println("Successfully undone step")
-          case Failure(t) => println(s"Error: " + t)
+          case Failure(t) => println("Error: " + t) //val dia = Dialog.showConfirmation(contents.head, t, "Hinweis", optionType = Dialog.Options.Default)
         }
         //redraw()
       })
       contents += new MenuItem(Action("Redo") {
         controller.redo match {
           case Success(_) => println("Successfully redone step")
-          case Failure(t) => println(s"Error: " + t)
+          case Failure(t) => println("Error: " + t) //val dia = Dialog.showConfirmation(contents.head, t, "Hinweis", optionType = Dialog.Options.Default)
         }
         //redraw()
       })
@@ -143,14 +143,21 @@ class Gui(controller: Controller) extends Frame with Observer {
     }
   }
 
+  // TODO rewrite to work with new controller.move function
   def buttonActionListener(): Unit = {
     for {
       x <- 0 until row
       y <- 0 until col
     } fieldButtons(x)(y).reactions += {
       case b: ButtonClicked =>
-        if (controller.round % 2 == 0) {
-          if (x == 0) {
+        //TODO player 1 = 1 // player2 = 0
+        controller.moveGui(x, y).onComplete {
+          case Success(_) => redraw()
+          case Failure(e) => val dia = Dialog.showConfirmation(contents.head, e, "Hinweis", optionType = Dialog.Options.Default)
+        }
+
+        /*if (controller.round % 2 == 0) {
+          if (x == 0) { // y + 0
             val dia = Dialog.showConfirmation(contents.head, "Falscher Spieler", "Hinweis", optionType = Dialog.Options.Default)
           } else {
             if(controller.gameboard.gb(y + 1) == 0) {
@@ -158,14 +165,14 @@ class Gui(controller: Controller) extends Frame with Observer {
             } else {
               controller.move(y + 1).onComplete {
                 case Success(v) => println("")
-                case Failure(e) => print(e)
+                case Failure(e) => val dia = Dialog.showConfirmation(contents.head, e, "Hinweis", optionType = Dialog.Options.Default)
               }
               redraw()
             }
           }
-
+        //TODO player 2
         } else if (controller.round % 2 == 1) {
-          if (x == 1) {
+          if (x == 1) { // y + 7
             val dia = Dialog.showConfirmation(contents.head, "Falscher Spieler", "Hinweis", optionType = Dialog.Options.Default)
           } else {
             if(controller.gameboard.gb(13 - y) == 0) {
@@ -173,12 +180,12 @@ class Gui(controller: Controller) extends Frame with Observer {
             } else {
               controller.move(13 - y).onComplete {
                 case Success(v) => println("")
-                case Failure(e) => print(e)
+                case Failure(e) => val dia = Dialog.showConfirmation(contents.head, e, "Hinweis", optionType = Dialog.Options.Default)
               }
               redraw()
             }
           }
-        }
+        }*/
     }
   }
 

@@ -6,16 +6,17 @@ case class Gameboard(gb: Array[Int]) extends GameboardInterface {
   val SIZE = 14
   val stones = 6
 
+  // deprecated function
   def boardInit(amountStonesStart: Int): Option[Unit] = {
     Some(setStones(amountStonesStart))
   }
 
   def boardInit(gameboard: Array[Int]): Option[Unit] = {
-    Some(for (i <- 0 to 13) gb(i) = gameboard(i))
+    Some(gameboard.copyToArray(gb))
   }
 
   def setBoard(newBoard: Array[Int]): Option[Unit] = {
-    Some(for (i <- 0 to 13) gb(i) = newBoard(i))
+    Some(newBoard.copyToArray(gb))
   }
 
   def setStones(amountStonesStart: Int): Unit = {
@@ -26,10 +27,10 @@ case class Gameboard(gb: Array[Int]) extends GameboardInterface {
     for (i <- 8 until 14) gb(i) = amountStonesStart
   }
 
-  override def toString: String = {
+  /*override def toString: String = {
     var s: String = ""
     for (i <- gb.indices)
       s += gb(i)
     s
-  }
+  }*/
 }

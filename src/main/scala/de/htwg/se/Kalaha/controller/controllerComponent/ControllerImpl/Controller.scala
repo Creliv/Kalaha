@@ -31,18 +31,21 @@ class Controller() extends Observable with ControllerInterface with Publisher{
   private val undoManager = new UndoManagerImpl(this)
   val fileIO = new FileIO
   var round = 0
+  var playerTurn1 = true
+  var playerTurn2 = false
   var gui: Gui = _
   var tui: Tui = _
 
   //val injector = Guice.createInjector(new GameboardModule)
   //val fileIo = injector.instance[FileIOInterface]
 
+  // deprecated function
   def controllerInit(amountStonesStart: Int): Future[Unit] = {
     amountStones = amountStonesStart
     gameboard.boardInit(amountStonesStart).getOrElse(new Exception("Error: Could not initialize board!"))
     Future.successful(this.gameStatus = NEW)
     Future.failed(new Exception("Error: Could not initialize board1!"))
-    // notifyObservers
+    //notifyObservers
     //publish()
   }
 
@@ -51,7 +54,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
     gameboard.boardInit(boardArray).getOrElse(new Exception("Error: Could not initialize board!"))
     Future.successful(gui = new Gui(this))
     Future.successful(tui = new Tui(this))
-    Future.successful(tui.startGame())
+    Future.successful(tui.startGame)
     Future.successful(this.gameStatus = NEW)
   }
 
@@ -59,7 +62,92 @@ class Controller() extends Observable with ControllerInterface with Publisher{
     amountStones = x
   }
 
-  def move(inputIndex: Int): Future[Unit] = {
+  //TODO implement playerTurn and emptyField here (from gui/tui)
+  def moveGui(inputX: Int, inputY: Int): Future[Unit] = {
+    Future {
+
+      //TODO take "coordinates" X Y from GUI/TUI to move and check move
+      var index = inputY
+      //var index = 0
+      var turn = round % 2
+
+      print(inputX)
+      // turn >> playerTurn: Boolean
+      if (inputX == 0 && turn == 1) {
+        index = 13 - inputY
+        doMove(index)
+      } else if (inputX == 1 && turn == 0) {
+        index = inputY + 1
+        doMove(index)
+      } else {
+        Failure(throw new Exception("Error: not your turn!"))
+      }
+    }
+  }
+
+  def moveTui(inputX: Int, inputY: Int): Future[Unit] = {
+    Future {
+
+      //TODO take "coordinates" X Y from GUI/TUI to move and check move
+      var index = inputY
+      //var index = 0
+      var turn = round % 2
+
+      print(inputX)
+      // turn >> playerTurn: Boolean
+      if (inputX == 0 && turn == 1) {
+        index = inputY + 7
+        doMove(index)
+      } else if (inputX == 1 && turn == 0) {
+        index = inputY + 1
+        doMove(index)
+      } else {
+        Failure(throw new Exception("Error: not your turn!"))
+      }
+    }
+  }
+
+  def doMove(input: Int) = {
+    var index = input
+    var last = 0
+    //print("index = " + index + "\n")
+    var turn = round % 2
+    //print("Turn = " + turn + "\n")
+    for (i <- 0 to 13) {
+      oldgb.gb(i) = gameboard.gb(i)
+    }
+    //TODO check if mulde is empty.
+    val countStonesInMuld: Int = gameboard.gb(index)
+    //print("Balls = " + countStonesInMuld + "\n")
+    gameboard.gb(index) = 0
+    for (i <- 1 until countStonesInMuld + 1) {
+      if ((turn == 0 && (index + i) % 14 == 0) || (turn == 1 && (index + i) % 14 == p1)) {
+        //print("turn: " + round % 2 + " i = " + (index + i) + " x = " + countStonesInMuld + " skip\n")
+        //check if last hole > gameboard
+        if (index + i >= gameboard.gb.length) {
+          val y: Int = (index + i - gameboard.gb.length) % 14
+          gameboard.gb(y + 1) += 1
+          index += 1
+        } else {
+          gameboard.gb(index + i) += 1
+        }
+      } else {
+        if (index + i >= gameboard.gb.length) {
+          val y: Int = (index + i - gameboard.gb.length) % 14
+          gameboard.gb(y) += 1
+        } else {
+          gameboard.gb(index + i) += 1
+        }
+      }
+      if (i == countStonesInMuld) last = (index + i) % 14
+    }
+    undone = false
+    checkExtra(last)
+    this.round += 1
+    notifyObservers
+  }
+
+  /*def move(inputIndex: Int): Future[Unit] = {
     Future {
       var index = inputIndex
 
@@ -95,10 +183,19 @@ class Controller() extends Observable with ControllerInterface with Publisher{
         if (i == countStonesInMuld) last = (index + i) % 14
       }
       undone = false
-      notifyObservers
+
       checkExtra(last)
 
       this.round += 1
+      notifyObservers
+    }
+  }*/
+
+  def checkPlayerTurn: Boolean = {
+    if (round % 2 == 0) {
+      true
+    } else {
+      false
     }
   }
 
@@ -131,7 +228,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
 
   def undo(): Try[Unit] = Try {
     if (undone) {
-      throw new IllegalArgumentException("Es ist nur möglich einen Zug rückgängig zu machen1")
+      Failure(throw new IllegalArgumentException("Es ist nur möglich einen Zug rückgängig zu machen1"))
     } else {
       gameStatus = UNDO
       undoManager.undoMove.get
@@ -143,7 +240,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
 
   def redo(): Try[Unit] = Try {
     if(!undone) {
-      throw new IllegalArgumentException("Es ist nur möglich einen Zug vorwärts zu machen1")
+      Failure(throw new IllegalArgumentException("Es ist nur möglich einen Zug vorwärts zu machen1"))
     } else {
       gameStatus = REDO
       undoManager.redoMove.get

@@ -10,7 +10,7 @@ import scala.io.StdIn
 
 object Routes {
   val route =
-    path("hello") {
+    path("board") {
       get {
         complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>Say hello to akka-http</h1>"))
       }
