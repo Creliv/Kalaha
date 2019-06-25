@@ -78,7 +78,7 @@ class Tui(controller: Controller) extends Observer {
 
 def startTurn(inputX: Int, inputY: Int): String = {
   controller.moveTui(inputX, inputY).onComplete {
-    case Success(v) => showGameboard()
+    case Success(v) => controller.notifyObservers()
     case Failure(e) => println("Error: " + e)
   }
   ""

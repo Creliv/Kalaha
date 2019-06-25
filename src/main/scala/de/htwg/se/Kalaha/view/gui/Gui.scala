@@ -141,7 +141,7 @@ class Gui(controller: Controller) extends Frame with Observer {
     } fieldButtons(x)(y).reactions += {
       case b: ButtonClicked =>
         controller.moveGui(x, y).onComplete {
-          case Success(_) => redraw()
+          case Success(_) => controller.notifyObservers()
           case Failure(e) => val dia = Dialog.showConfirmation(contents.head, e, "Hinweis", optionType = Dialog.Options.Default)
         }
 

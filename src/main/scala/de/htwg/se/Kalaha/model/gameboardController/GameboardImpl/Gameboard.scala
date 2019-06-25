@@ -19,6 +19,11 @@ case class Gameboard(gb: Array[Int]) extends GameboardInterface {
     Some(newBoard.copyToArray(gb))
   }
 
+  //TODO function to clone gameboard
+  def clone(newBoard: Gameboard): Option[Unit] = {
+    Some(newBoard.copy(gb))
+  }
+
   def setStones(amountStonesStart: Int): Unit = {
     val stones2 = amountStonesStart
     gb(0) = 0

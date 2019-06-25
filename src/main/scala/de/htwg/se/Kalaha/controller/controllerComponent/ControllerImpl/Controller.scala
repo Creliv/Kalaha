@@ -140,7 +140,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
     undone = false
     checkExtra(last)
     this.round += 1
-    notifyObservers
+
   }
 
   /*def move(inputIndex: Int): Future[Unit] = {
