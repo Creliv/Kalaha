@@ -8,9 +8,6 @@ import akka.stream.ActorMaterializer
 import de.htwg.se.Kalaha.controller.controllerComponent.ControllerImpl.Controller
 import de.htwg.se.Kalaha.view.tui.Tui
 
-import scala.concurrent.Future
-import scala.util._
-
 class WebServer(tui: Tui) extends Controller {
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()

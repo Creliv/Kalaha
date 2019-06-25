@@ -11,9 +11,6 @@ import akka.pattern.ask
 import akka.util.Timeout
 import scala.concurrent.Await
 import de.htwg.se.Kalaha.view.tui.Tui
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util._
 import scala.concurrent.duration._
 
 object Kalaha extends Observable{
@@ -21,7 +18,7 @@ object Kalaha extends Observable{
   val injector = Guice.createInjector(new KalahaModule)
   val controller = injector.getInstance(classOf[Controller])
 
-  implicit val timeout = Timeout(5 seconds)
+  implicit val timeout = Timeout(5, TimeUnit.SECONDS)
 
   implicit val system = ActorSystem("actorSystem")
   val startUI = system.actorOf(Props[UiActor])

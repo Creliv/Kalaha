@@ -7,10 +7,6 @@ import scala.concurrent._
 
 trait ControllerInterface {
 
-  def controllerInit(amountStonesStart: Int): Future[Unit]
-
-//  def controllerInit(): Future[Unit]
-
   def updateStones(x: Int): Unit
 
   def moveGui(inputX: Int, inputY: Int): Future[Unit]

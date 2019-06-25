@@ -19,45 +19,47 @@ class FileIO extends FileIOInterface {
       val source1: String = Source.fromFile("D:\\board.json").getLines.mkString
       val json1: JsValue = Json.parse(source1)
       loadRound(json1, controller) match {
-        case Some(v) => controller.round = v
-        case None => println("Error: Could not parse Json-File for <round>")
+        case Success(v) => controller.round = v
+        case Failure(e) => println("Error: Could not parse Json-File for <round>" + e)
       }
       loadStones(json1, controller) match {
-        case Some(v) => controller.amountStones = v
-        case None => println("Error: Could not parse Json-File for <round>")
+        case Success(v) => controller.amountStones = v
+        case Failure(e) => println("Error: Could not parse Json-File for <round>" + e)
       }
-      loadBoard(json1, controller)
+      loadBoard(json1, controller) match {
+        case Success(v) => controller.gameboard.boardInit(v)
+        case Failure(e) => println("Error: Could not parse Json-File for <round>" + e)
+      }
       controller.notifyObservers
     }
   }
 
-  def loadRound(json: JsValue, controller: Controller): Option[Int] = {
-    try {
-      Some((json \ "gameboard" \ "round").get.toString().toInt)
-    } catch {
-      case e: JsonParseException => None
+  def loadRound(json: JsValue, controller: Controller): Try[Int] = {
+    Try {
+      (json \ "gameboard" \ "round").get.toString().toInt
     }
   }
 
-  def loadStones(json:JsValue, controller: Controller): Option[Int] = {
-    try {
-      Some((json \ "gameboard" \ "amountstones").get.toString().toInt)
-    } catch {
-      case e: JsonParseException => None
+  def loadStones(json:JsValue, controller: Controller): Try[Int] = {
+    Try {
+      (json \ "gameboard" \ "amountstones").get.toString().toInt
     }
   }
 
-  def loadBoard(json: JsValue, controller: Controller): Unit = {
-    val boardArray = new Array[Int](14)
-    val board = (json \ "gameboard" \ "board").get.toString()
-    val jsonList: List[JsValue] = Json.parse(board).as[List[JsValue]]
-    for (feld <- jsonList) {
-      for (i: Int <- 0 to 13) {
-        boardArray(i) = (feld \ i.toString).get.toString().toInt
-//        controller.gameboard.gb(i) = (feld \ i.toString).get.toString().toInt
+  def loadBoard(json: JsValue, controller: Controller): Try[Array[Int]] = {
+    Try {
+      val boardArray = new Array[Int](14)
+
+      val board = (json \ "gameboard" \ "board").get.toString()
+      val jsonList: List[JsValue] = Json.parse(board).as[List[JsValue]]
+      for (feld <- jsonList) {
+        for (i: Int <- 0 to 13) {
+          boardArray(i) = (feld \ i.toString).get.toString().toInt
+//                    controller.gameboard.gb(i) = (feld \ i.toString).get.toString().toInt
+        }
       }
+      boardArray
     }
-    controller.gameboard.boardInit(boardArray)
   }
 
   override def save(controller: Controller): Try[Unit] = {

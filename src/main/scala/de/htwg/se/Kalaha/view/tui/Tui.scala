@@ -14,14 +14,11 @@ case class Tui(controller: Controller) extends Observer {
   print(showGameboard)
   print(printHelp())
 
-
-
-
   //TODO parse moveinput
   def inputFct(input: String) = {
     checkPlayer
     input match {
-      case "option" => askForAmountStonesStart
+      case o if input.startsWith("option") => askForAmountStonesStart
       case "help" => println(help)
       case "show" => println(showGameboard)
       case "undo" => controller.undo match {
@@ -76,7 +73,7 @@ def startTurn(inputX: Int, inputY: Int): String = {
     case Success(v) => controller.notifyObservers()
     case Failure(e) => println("Error: " + e)
   }
-  ""
+  showGameboard()
 }
 
   /*var turn = controller.round % 2
