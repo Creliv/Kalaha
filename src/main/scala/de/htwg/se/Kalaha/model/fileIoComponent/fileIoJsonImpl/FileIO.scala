@@ -48,13 +48,16 @@ class FileIO extends FileIOInterface {
   }
 
   def loadBoard(json: JsValue, controller: Controller): Unit = {
+    val boardArray = new Array[Int](14)
     val board = (json \ "gameboard" \ "board").get.toString()
     val jsonList: List[JsValue] = Json.parse(board).as[List[JsValue]]
     for (feld <- jsonList) {
       for (i: Int <- 0 to 13) {
-        controller.gameboard.gb(i) = (feld \ i.toString).get.toString().toInt
+        boardArray(i) = (feld \ i.toString).get.toString().toInt
+//        controller.gameboard.gb(i) = (feld \ i.toString).get.toString().toInt
       }
     }
+    controller.gameboard.boardInit(boardArray)
   }
 
   override def save(controller: Controller): Try[Unit] = {

@@ -16,9 +16,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class Controller() extends Observable with ControllerInterface with Publisher{
   val stones: Int = 6
   val boardArray = Array(0, stones, stones, stones, stones, stones, stones, 0, stones, stones, stones, stones, stones, stones)
-  val gameboard = new Gameboard(Array(0,0,0,0,0,0,0,0,0,0,0,0,0,0))
-  val oldgb = new Gameboard(Array(0,0,0,0,0,0,0,0,0,0,0,0,0,0))
-  val vBoard = new Gameboard(Array(0,0,0,0,0,0,0,0,0,0,0,0,0,0))
+  val gameboard = new Gameboard(new Array[Int](14))
+  val oldgb = new Gameboard(new Array[Int](14))
+  val vBoard = new Gameboard(new Array[Int](14))
 
   var gameStatus: GameStatus = IDLE
 
@@ -309,7 +309,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
   def load: Unit = Try[Unit] {
     fileIO.load(this) match {
       case Success(v) => println("Successfully loaded gamestate from Json-File!")
-      case Failure(e) => println(e)
+      case Failure(e) => println("Error: " + e)
     }
   }
   //TODO doesnt get updated properly
