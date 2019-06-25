@@ -66,7 +66,6 @@ class Controller() extends Observable with ControllerInterface with Publisher{
   def moveGui(inputX: Int, inputY: Int): Future[Unit] = {
     Future {
 
-      //TODO take "coordinates" X Y from GUI/TUI to move and check move
       var index = inputY
       //var index = 0
       var turn = round % 2

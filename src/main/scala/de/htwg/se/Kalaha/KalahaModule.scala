@@ -9,6 +9,7 @@ class KalahaModule extends AbstractModule with ScalaModule {
 
   override def configure(): Unit = {
     bind[ControllerInterface].to[Controller]
+    //TODO bind FileIO
   }
 
 }

@@ -23,8 +23,6 @@ class Gui(controller: Controller) extends Frame with Observer {
 
   var fieldButtons = Array.ofDim[FieldButton](row, col)
 
-  //var p = new Publisher {}
-
   title = "Kalaha"
   preferredSize = new Dimension(width, height)
 
@@ -49,7 +47,6 @@ class Gui(controller: Controller) extends Frame with Observer {
   val kalaha2: TextField = new TextField() {
     font = new Font("Arial", 0, 150)
     background = Color.decode("#6365ff")
-    //print("p2: " + controller.board.gameboard(0).toString)
     text = controller.gameboard.gb(0).toString
     preferredSize = new Dimension(200, 600)
     editable = false
@@ -69,7 +66,6 @@ class Gui(controller: Controller) extends Frame with Observer {
       mnemonic = Key.F
       contents += new MenuItem(Action("Neues Spiel") {
         reset
-        //redraw()
       })
       contents += new MenuItem(Action("Als JSON speichern") {
         Try(controller.save)
@@ -91,14 +87,12 @@ class Gui(controller: Controller) extends Frame with Observer {
           case Success(_) => println("Successfully undone step")
           case Failure(t) => println("Error: " + t) //val dia = Dialog.showConfirmation(contents.head, t, "Hinweis", optionType = Dialog.Options.Default)
         }
-        //redraw()
       })
       contents += new MenuItem(Action("Redo") {
         controller.redo match {
           case Success(_) => println("Successfully redone step")
           case Failure(t) => println("Error: " + t) //val dia = Dialog.showConfirmation(contents.head, t, "Hinweis", optionType = Dialog.Options.Default)
         }
-        //redraw()
       })
     }
     contents += new Menu("Options") {
@@ -115,9 +109,7 @@ class Gui(controller: Controller) extends Frame with Observer {
       })
     }
   }
-
   visible = true
-  //redraw()
 
   def gridPanel: GridPanel = new GridPanel(row, col) {
     preferredSize = new Dimension(600, 600)
@@ -126,7 +118,6 @@ class Gui(controller: Controller) extends Frame with Observer {
         contents += fieldButtons(x)(y)
       }
     }
-    //print("-------------------------test")
 
   }
 
@@ -143,49 +134,46 @@ class Gui(controller: Controller) extends Frame with Observer {
     }
   }
 
-  // TODO rewrite to work with new controller.move function
   def buttonActionListener(): Unit = {
     for {
       x <- 0 until row
       y <- 0 until col
     } fieldButtons(x)(y).reactions += {
       case b: ButtonClicked =>
-        //TODO player 1 = 1 // player2 = 0
         controller.moveGui(x, y).onComplete {
           case Success(_) => redraw()
           case Failure(e) => val dia = Dialog.showConfirmation(contents.head, e, "Hinweis", optionType = Dialog.Options.Default)
         }
 
-        /*if (controller.round % 2 == 0) {
-          if (x == 0) { // y + 0
-            val dia = Dialog.showConfirmation(contents.head, "Falscher Spieler", "Hinweis", optionType = Dialog.Options.Default)
-          } else {
-            if(controller.gameboard.gb(y + 1) == 0) {
-              val dia = Dialog.showConfirmation(contents.head, "Feld darf nicht leer sein", "Hinweis", optionType = Dialog.Options.Default)
-            } else {
-              controller.move(y + 1).onComplete {
-                case Success(v) => println("")
-                case Failure(e) => val dia = Dialog.showConfirmation(contents.head, e, "Hinweis", optionType = Dialog.Options.Default)
-              }
-              redraw()
-            }
-          }
-        //TODO player 2
-        } else if (controller.round % 2 == 1) {
-          if (x == 1) { // y + 7
-            val dia = Dialog.showConfirmation(contents.head, "Falscher Spieler", "Hinweis", optionType = Dialog.Options.Default)
-          } else {
-            if(controller.gameboard.gb(13 - y) == 0) {
-              val dia = Dialog.showConfirmation(contents.head, "Feld darf nicht leer sein", "Hinweis", optionType = Dialog.Options.Default)
-            } else {
-              controller.move(13 - y).onComplete {
-                case Success(v) => println("")
-                case Failure(e) => val dia = Dialog.showConfirmation(contents.head, e, "Hinweis", optionType = Dialog.Options.Default)
-              }
-              redraw()
-            }
-          }
-        }*/
+//        if (controller.round % 2 == 0) {
+//          if (x == 0) { // y + 0
+//            val dia = Dialog.showConfirmation(contents.head, "Falscher Spieler", "Hinweis", optionType = Dialog.Options.Default)
+//          } else {
+//            if(controller.gameboard.gb(y + 1) == 0) {
+//              val dia = Dialog.showConfirmation(contents.head, "Feld darf nicht leer sein", "Hinweis", optionType = Dialog.Options.Default)
+//            } else {
+//              controller.move(y + 1).onComplete {
+//                case Success(v) => println("")
+//                case Failure(e) => val dia = Dialog.showConfirmation(contents.head, e, "Hinweis", optionType = Dialog.Options.Default)
+//              }
+//              redraw()
+//            }
+//          }
+//        } else if (controller.round % 2 == 1) {
+//          if (x == 1) { // y + 7
+//            val dia = Dialog.showConfirmation(contents.head, "Falscher Spieler", "Hinweis", optionType = Dialog.Options.Default)
+//          } else {
+//            if (controller.gameboard.gb(13 - y) == 0) {
+//              val dia = Dialog.showConfirmation(contents.head, "Feld darf nicht leer sein", "Hinweis", optionType = Dialog.Options.Default)
+//            } else {
+//              controller.move(13 - y).onComplete {
+//                case Success(v) => println("")
+//                case Failure(e) => val dia = Dialog.showConfirmation(contents.head, e, "Hinweis", optionType = Dialog.Options.Default)
+//              }
+//              redraw()
+//            }
+//          }
+//        }
     }
   }
 

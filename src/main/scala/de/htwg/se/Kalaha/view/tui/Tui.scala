@@ -102,39 +102,34 @@ def startTurn(inputX: Int, inputY: Int): String = {
   print(showGameboard)*/
 
 
-def readUserInput(): Int = {
-  val a = scala.io.StdIn.readInt()
-  print("The value of a is " + a)
-  a
-}
+//def readUserInput(): Int = {
+//  val a = scala.io.StdIn.readInt()
+//  print("The value of a is " + a)
+//  a
+//}
 
-/** *
-  * checkInputIFValid
-  *
-  * @param index userinput
-  */
 // check for empty field MULDE
-def checkInputIFValid(index: Int): Boolean = index match {
-  case x if 1 to 6 contains x =>
-    var idx = index
-    if (controller.round % 2 == 1) {
-      idx += 7
-    }
-    if (controller.gameboard.gb(idx) > 0) {
-      true
-    } else {
-      false
-    }
-  case _ => false
-}
+//def checkInputIFValid(index: Int): Boolean = index match {
+//  case x if 1 to 6 contains x =>
+//    var idx = index
+//    if (controller.round % 2 == 1) {
+//      idx += 7
+//    }
+//    if (controller.gameboard.gb(idx) > 0) {
+//      true
+//    } else {
+//      false
+//    }
+//  case _ => false
+//}
 
 def welcomeMsg(): Unit = {
   var s = ""
   s += "\n"
   s += "Welcome to Kalaha!! :D\n" +
     "Spielregeln: ....."
-  //TODO: Helpinfos und spielregeln
   print(s)
+  println(help)
 }
 
 def help: String = {
@@ -149,7 +144,6 @@ def help: String = {
   str
 }
 
-//TODO Return value changed from Unit to String for Webserver
 def showGameboard(): String = {
   val gameboardString = new Array[String](14)
   for (i <- gameboardString.indices) {
