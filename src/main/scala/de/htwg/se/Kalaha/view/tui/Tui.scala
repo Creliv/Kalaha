@@ -6,21 +6,16 @@ import de.htwg.se.Kalaha.util.Observer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
 
-class Tui(controller: Controller) extends Observer {
+case class Tui(controller: Controller) extends Observer {
   controller.addObserver(this)
 
-  def startGame: Unit = {
-    var input = ""
-    welcomeMsg()
-    print(showGameboard)
-    print(printHelp())
+  var input = ""
+  welcomeMsg()
+  print(showGameboard)
+  print(printHelp())
 
-    do {
-      input = scala.io.StdIn.readLine()
-      inputFct(input)
 
-    } while (input != "exit")
-  }
+
 
   //TODO parse moveinput
   def inputFct(input: String) = {

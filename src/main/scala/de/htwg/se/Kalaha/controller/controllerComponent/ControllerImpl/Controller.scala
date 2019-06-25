@@ -32,8 +32,8 @@ class Controller() extends Observable with ControllerInterface with Publisher{
   var round = 0
   var playerTurn1 = true
   var playerTurn2 = false
-  var gui: Gui = _
-  var tui: Tui = _
+//  var gui: Gui = _
+//  var tui: Tui = _
 
   //val injector = Guice.createInjector(new GameboardModule)
   //val fileIo = injector.instance[FileIOInterface]
@@ -48,14 +48,14 @@ class Controller() extends Observable with ControllerInterface with Publisher{
     //publish()
   }
 
-  def controllerInit(): Future[Unit] = {
+//  def controllerInit(): Future[Unit] = {
     updateStones(6)
     gameboard.boardInit(boardArray).getOrElse(new Exception("Error: Could not initialize board!"))
-    Future.successful(gui = new Gui(this))
-    Future.successful(tui = new Tui(this))
-    Future.successful(tui.startGame)
+//    Future.successful(gui = new Gui(this))
+//    Future.successful(tui = new Tui(this))
+//    Future.successful(tui.startGame)
     Future.successful(this.gameStatus = NEW)
-  }
+//  }
 
   def updateStones(x: Int): Unit = {
     amountStones = x

@@ -9,7 +9,7 @@ trait ControllerInterface {
 
   def controllerInit(amountStonesStart: Int): Future[Unit]
 
-  def controllerInit(): Future[Unit]
+//  def controllerInit(): Future[Unit]
 
   def updateStones(x: Int): Unit
 
