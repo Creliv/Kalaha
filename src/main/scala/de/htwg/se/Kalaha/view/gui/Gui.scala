@@ -8,6 +8,8 @@ import de.htwg.se.Kalaha.util.{Observer, Point}
 import scala.language.postfixOps
 import scala.swing._
 import scala.swing.event._
+import scala.util._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class Gui(controller: Controller) extends Frame with Observer {
 
@@ -21,12 +23,12 @@ class Gui(controller: Controller) extends Frame with Observer {
 
   var fieldButtons = Array.ofDim[FieldButton](row, col)
 
-  var p = new Publisher {}
-
   title = "Kalaha"
   preferredSize = new Dimension(width, height)
 
   setButtons()
+
+  val statusline = new TextField(controller.statusText, 20)
 
   val textPanel: TextField = new TextField() {
     editable = false
@@ -38,15 +40,14 @@ class Gui(controller: Controller) extends Frame with Observer {
     font = new Font("Arial", 0, 150)
     editable = false
     background = Color.decode("#cc2023")
-    text = controller.board.gameboard(controller.p1).toString
+    text = controller.gameboard.gb(controller.p1).toString
     preferredSize = new Dimension(200, 600)
   }
 
   val kalaha2: TextField = new TextField() {
     font = new Font("Arial", 0, 150)
     background = Color.decode("#6365ff")
-    //print("p2: " + controller.board.gameboard(0).toString)
-    text = controller.board.gameboard(0).toString
+    text = controller.gameboard.gb(0).toString
     preferredSize = new Dimension(200, 600)
     editable = false
   }
@@ -56,6 +57,7 @@ class Gui(controller: Controller) extends Frame with Observer {
     add(kalaha1, BorderPanel.Position.East)
     add(kalaha2, BorderPanel.Position.West)
     add(gridPanel, BorderPanel.Position.Center)
+    add(statusline, BorderPanel.Position.South)
   }
   buttonActionListener()
 
@@ -64,13 +66,12 @@ class Gui(controller: Controller) extends Frame with Observer {
       mnemonic = Key.F
       contents += new MenuItem(Action("Neues Spiel") {
         reset
-        redraw()
       })
       contents += new MenuItem(Action("Als JSON speichern") {
-        controller.save
+        Try(controller.save)
       })
       contents += new MenuItem(Action("Spiel laden") {
-        controller.load
+        Try(controller.load)
       })
       contents += new MenuItem(Action("Spielregeln") {
         help()
@@ -82,31 +83,33 @@ class Gui(controller: Controller) extends Frame with Observer {
     contents += new Menu("Edit") {
       mnemonic = Key.E
       contents += new MenuItem(Action("Undo") {
-        controller.undo
-        redraw()
+        controller.undo match {
+          case Success(_) => println("Successfully undone step")
+          case Failure(t) => println("Error: " + t) //val dia = Dialog.showConfirmation(contents.head, t, "Hinweis", optionType = Dialog.Options.Default)
+        }
       })
       contents += new MenuItem(Action("Redo") {
-        controller.redo
-        redraw()
+        controller.redo match {
+          case Success(_) => println("Successfully redone step")
+          case Failure(t) => println("Error: " + t) //val dia = Dialog.showConfirmation(contents.head, t, "Hinweis", optionType = Dialog.Options.Default)
+        }
       })
     }
     contents += new Menu("Options") {
       mnemonic = Key.O
       contents += new MenuItem(Action("Mit 4 Kugeln starten") {
         controller.updateStones(4)
-        controller.reset
+        reset
         redraw()
       })
       contents += new MenuItem(Action("Mit 6 Kugeln starten") {
         controller.updateStones(6)
-        controller.reset
+        reset
         redraw()
       })
     }
   }
-
   visible = true
-  //redraw()
 
   def gridPanel: GridPanel = new GridPanel(row, col) {
     preferredSize = new Dimension(600, 600)
@@ -115,7 +118,6 @@ class Gui(controller: Controller) extends Frame with Observer {
         contents += fieldButtons(x)(y)
       }
     }
-    print("-------------------------test")
 
   }
 
@@ -123,11 +125,11 @@ class Gui(controller: Controller) extends Frame with Observer {
     for (x <- 0 until col) {
       fieldButtons(0)(x) = new FieldButton(Point(0, x))
       fieldButtons(0)(x).background = Color.decode("#6365ff")
-      fieldButtons(0)(x).text = "" + controller.board.gameboard(13 - x)
+      fieldButtons(0)(x).text = "" + controller.gameboard.gb(13 - x)
       fieldButtons(0)(x).font = new Font("Arial", 0, 50)
       fieldButtons(1)(x) = new FieldButton(Point(1, x))
       fieldButtons(1)(x).background = Color.decode("#cc2023") //java.awt.Color.RED
-      fieldButtons(1)(x).text = "" + controller.board.gameboard(x + 1)
+      fieldButtons(1)(x).text = "" + controller.gameboard.gb(x + 1)
       fieldButtons(1)(x).font = new Font("Arial", 0, 50)
     }
   }
@@ -138,35 +140,45 @@ class Gui(controller: Controller) extends Frame with Observer {
       y <- 0 until col
     } fieldButtons(x)(y).reactions += {
       case b: ButtonClicked =>
-        if (controller.board.round % 2 == 0) {
-          if (x == 0) {
-            val dia = Dialog.showConfirmation(contents.head, "Falscher Spieler", "Hinweis", optionType = Dialog.Options.Default)
-          } else {
-            if(controller.board.gameboard(y + 1) == 0) {
-              val dia = Dialog.showConfirmation(contents.head, "Feld darf nicht leer sein", "Hinweis", optionType = Dialog.Options.Default)
-            } else {
-              controller.move(y + 1)
-              redraw()
-            }
-          }
-
-        } else if (controller.board.round % 2 == 1) {
-          if (x == 1) {
-            val dia = Dialog.showConfirmation(contents.head, "Falscher Spieler", "Hinweis", optionType = Dialog.Options.Default)
-          } else {
-            if(controller.board.gameboard(13 - y) == 0) {
-              val dia = Dialog.showConfirmation(contents.head, "Feld darf nicht leer sein", "Hinweis", optionType = Dialog.Options.Default)
-            } else {
-              controller.move(13 - y)
-              redraw()
-            }
-          }
+        controller.moveGui(x, y).onComplete {
+          case Success(_) => controller.notifyObservers()
+          case Failure(e) => val dia = Dialog.showConfirmation(contents.head, e, "Hinweis", optionType = Dialog.Options.Default)
         }
+
+//        if (controller.round % 2 == 0) {
+//          if (x == 0) { // y + 0
+//            val dia = Dialog.showConfirmation(contents.head, "Falscher Spieler", "Hinweis", optionType = Dialog.Options.Default)
+//          } else {
+//            if(controller.gameboard.gb(y + 1) == 0) {
+//              val dia = Dialog.showConfirmation(contents.head, "Feld darf nicht leer sein", "Hinweis", optionType = Dialog.Options.Default)
+//            } else {
+//              controller.move(y + 1).onComplete {
+//                case Success(v) => println("")
+//                case Failure(e) => val dia = Dialog.showConfirmation(contents.head, e, "Hinweis", optionType = Dialog.Options.Default)
+//              }
+//              redraw()
+//            }
+//          }
+//        } else if (controller.round % 2 == 1) {
+//          if (x == 1) { // y + 7
+//            val dia = Dialog.showConfirmation(contents.head, "Falscher Spieler", "Hinweis", optionType = Dialog.Options.Default)
+//          } else {
+//            if (controller.gameboard.gb(13 - y) == 0) {
+//              val dia = Dialog.showConfirmation(contents.head, "Feld darf nicht leer sein", "Hinweis", optionType = Dialog.Options.Default)
+//            } else {
+//              controller.move(13 - y).onComplete {
+//                case Success(v) => println("")
+//                case Failure(e) => val dia = Dialog.showConfirmation(contents.head, e, "Hinweis", optionType = Dialog.Options.Default)
+//              }
+//              redraw()
+//            }
+//          }
+//        }
     }
   }
 
   def redraw(): Unit = {
-    if (controller.board.round % 2 == 0) {
+    if (controller.round % 2 == 0) {
       textPanel.background = Color.decode("#cc2023")
       str = "Spieler 1 ist am Zug"
       textPanel.text_=(str)
@@ -176,11 +188,11 @@ class Gui(controller: Controller) extends Frame with Observer {
       textPanel.text_=(str)
     }
     for (x <- 0 until col) {
-      fieldButtons(0)(x).text = "" + controller.board.gameboard(13 - x)
-      fieldButtons(1)(x).text = "" + controller.board.gameboard(x + 1)
+      fieldButtons(0)(x).text = "" + controller.gameboard.gb(13 - x)
+      fieldButtons(1)(x).text = "" + controller.gameboard.gb(x + 1)
     }
-    kalaha1.text = controller.board.gameboard(controller.p1).toString
-    kalaha2.text = "" + controller.board.gameboard(0)
+    kalaha1.text = controller.gameboard.gb(controller.p1).toString
+    kalaha2.text = "" + controller.gameboard.gb(0)
 
     repaint
   }
@@ -201,22 +213,24 @@ class Gui(controller: Controller) extends Frame with Observer {
 
   def checkWin(): Unit = {
     controller.checkWin()
+    redraw()
     if (controller.p2win && controller.p1win) {
       val dia = Dialog.showConfirmation(contents.head, "Unentschieden!", "Spielende", optionType = Dialog.Options.Default)
       controller.exit()
     }
     if(controller.p1win) {
-      val str = "Spieler 1 gewinnt mit " + controller.board.gameboard(controller.p1) + " Punkten! Spieler 2 hat " + controller.board.gameboard(0) + " Punkte."
+      val str = "Spieler 1 gewinnt mit " + controller.gameboard.gb(controller.p1) + " Punkten! Spieler 2 hat " + controller.gameboard.gb(0) + " Punkte."
         val dia = Dialog.showConfirmation(contents.head, str, "Spielende", optionType = Dialog.Options.Default)
         controller.exit()
     } else if (controller.p2win) {
-      val str = "Spieler 2 gewinnt mit " + controller.board.gameboard(0) + " Punkten! Spieler 2 hat " + controller.board.gameboard(controller.p1) + " Punkte."
+      val str = "Spieler 2 gewinnt mit " + controller.gameboard.gb(0) + " Punkten! Spieler 2 hat " + controller.gameboard.gb(controller.p1) + " Punkte."
       val dia = Dialog.showConfirmation(contents.head, str, "Spielende", optionType = Dialog.Options.Default)
       controller.exit()
     }
   }
 
   override def update(): Unit = {
+    controller.statusText()
     checkWin()
     redraw()
   }

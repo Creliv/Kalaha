@@ -1,22 +1,25 @@
 package de.htwg.se.Kalaha.controller.controllerComponent
 
+import de.htwg.se.Kalaha.view.gui.Gui
+
+import scala.util._
+import scala.concurrent._
+
 trait ControllerInterface {
-
-  def controllerInit(amountStonesStart: Int): Unit
-
-  def controllerInit(): Unit
 
   def updateStones(x: Int): Unit
 
-  def move(inputIndex: Int): Unit
+  def moveGui(inputX: Int, inputY: Int): Future[Unit]
+
+  def moveTui(inputX: Int, inputY: Int): Future[Unit]
 
   def collectEnemyStones(last: Int): Unit
 
   def checkExtra(last: Int): Unit
 
-  def undo(): Unit
+  def undo(): Try[Unit]
 
-  def redo(): Unit
+  def redo(): Try[Unit]
 
   def reset(): Unit
 
@@ -26,6 +29,9 @@ trait ControllerInterface {
 
   def exit(): Unit
 
-  def save: Unit
+  def save(): Unit
 
+  def load(): Unit
+
+  def statusText(): String
 }

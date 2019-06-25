@@ -1,195 +1,269 @@
 package de.htwg.se.Kalaha.controller.controllerComponent.ControllerImpl
 
-import de.htwg.se.Kalaha.controller.controllerComponent.ControllerInterface
+import de.htwg.se.Kalaha.controller.controllerComponent.{ControllerInterface, GameStatus}
+import de.htwg.se.Kalaha.controller.controllerComponent.GameStatus._
 import de.htwg.se.Kalaha.model.gameboardController.GameboardImpl.Gameboard
 import de.htwg.se.Kalaha.model.fileIoComponent.fileIoJsonImpl.FileIO
-import de.htwg.se.Kalaha.util.{Observable, UndoManager}
+import de.htwg.se.Kalaha.util.{Observable, UndoManagerImpl}
 import de.htwg.se.Kalaha.view.gui.Gui
 import de.htwg.se.Kalaha.view.tui.Tui
 
-class Controller() extends Observable with ControllerInterface {
-  var board = new Gameboard
-  //var vboard = new
+import scala.swing.Publisher
+import scala.util._
+import scala.concurrent._
+import scala.concurrent.ExecutionContext.Implicits.global
+
+class Controller() extends Observable with ControllerInterface with Publisher{
+  val stones: Int = 6
+  val boardArray = Array(0, stones, stones, stones, stones, stones, stones, 0, stones, stones, stones, stones, stones, stones)
+  val gameboard = new Gameboard(new Array[Int](14))
+  val oldgb = new Gameboard(new Array[Int](14))
+  val vBoard = new Gameboard(new Array[Int](14))
+
+  var gameStatus: GameStatus = IDLE
+
   var amountStones = 0
   var undone = false
-  var p1win = false
-  var p2win = false
+  var p1win, p2win = false
   val p1 = 7
   val p2 = 0
-  private val undoManager = new UndoManager
-  var fileIO = new FileIO
+  private val undoManager = new UndoManagerImpl(this)
+  val fileIO = new FileIO
+  var round = 0
+  var playerTurn1 = true
+  var playerTurn2 = false
 
-  //val injector = Guice.createInjector(new GameboardModule)
-  //val fileIo = injector.instance[FileIOInterface]
-
-  def controllerInit(amountStonesStart: Int): Unit = {
-    amountStones = amountStonesStart
-    board.boardInit(amountStonesStart)
-    // notifyObservers
-  }
-
-  def controllerInit(): Unit = {
-    updateStones(6)
-    board.boardInit()
-    val tui = new Tui(this)
-    val gui = new Gui(this)
-    tui.startGame()
-  }
+  updateStones(6)
+  gameboard.boardInit(boardArray).getOrElse(new Exception("Error: Could not initialize board!"))
+  gameStatus = NEW
 
   def updateStones(x: Int): Unit = {
     amountStones = x
   }
 
-  def move(inputIndex: Int): Unit = {
-    var index = inputIndex
+  //TODO implement playerTurn and emptyField here (from gui/tui)
+  def moveGui(inputX: Int, inputY: Int): Future[Unit] = {
+    Future {
+
+      var index = inputY
+      var turn = round % 2
+
+      print(inputX)
+      // turn >> playerTurn: Boolean
+      if (inputX == 0 && turn == 1) {
+        index = 13 - inputY
+        doMove(index)
+      } else if (inputX == 1 && turn == 0) {
+        index = inputY + 1
+        doMove(index)
+      } else {
+        Failure(throw new Exception("Error: not your turn!"))
+      }
+    }
+  }
+
+  def moveTui(inputX: Int, inputY: Int): Future[Unit] = {
+    Future {
+      var index = inputY
+      //var index = 0
+      var turn = round % 2
+
+      print(inputX)
+      // turn >> playerTurn: Boolean
+      if (inputX - 1== 0 && turn == 1) {
+        index = inputY + 8
+        doMove(index)
+      } else if (inputX + 1== 1 && turn == 0) {
+        index = inputY + 1
+        doMove(index)
+      } else {
+        Failure(throw new Exception("Error: not your turn!"))
+      }
+    }
+  }
+
+  def doMove(input: Int) = {
+    var index = input
     var last = 0
     //print("index = " + index + "\n")
-    val turn = board.round % 2
+    var turn = round % 2
     //print("Turn = " + turn + "\n")
-    board.oldgb = board.gameboard.clone()
-    val countStonesInMuld: Int = board.gameboard(index)
+    for (i <- 0 to 13) {
+      oldgb.gb(i) = gameboard.gb(i)
+    }
+    //TODO check if mulde is empty.
+    val countStonesInMuld: Int = gameboard.gb(index)
     //print("Balls = " + countStonesInMuld + "\n")
-    board.gameboard(index) = 0
+    gameboard.gb(index) = 0
     for (i <- 1 until countStonesInMuld + 1) {
       if ((turn == 0 && (index + i) % 14 == 0) || (turn == 1 && (index + i) % 14 == p1)) {
         //print("turn: " + round % 2 + " i = " + (index + i) + " x = " + countStonesInMuld + " skip\n")
         //check if last hole > gameboard
-        if (index + i >= board.gameboard.length) {
-          val y: Int = (index + i - board.gameboard.length) % 14
-          board.gameboard(y + 1) += 1
+        if (index + i >= gameboard.gb.length) {
+          val y: Int = (index + i - gameboard.gb.length) % 14
+          gameboard.gb(y + 1) += 1
           index += 1
         } else {
-          board.gameboard(index + i) += 1
+          gameboard.gb(index + i) += 1
         }
       } else {
-        if (index + i >= board.gameboard.length) {
-          val y: Int = (index + i - board.gameboard.length) % 14
-          board.gameboard(y) += 1
+        if (index + i >= gameboard.gb.length) {
+          val y: Int = (index + i - gameboard.gb.length) % 14
+          gameboard.gb(y) += 1
         } else {
-          board.gameboard(index + i) += 1
+          gameboard.gb(index + i) += 1
         }
       }
-      if (i == countStonesInMuld) {
-        last = (index + i) % 14
-      }
+      if (i == countStonesInMuld) last = (index + i) % 14
     }
-
     undone = false
-    notifyObservers
     checkExtra(last)
+    this.round += 1
 
-    board.round += 1
+  }
+
+  /*def move(inputIndex: Int): Future[Unit] = {
+    Future {
+      var index = inputIndex
+
+      var last = 0
+      //print("index = " + index + "\n")
+      val turn = round % 2
+      //print("Turn = " + turn + "\n")
+      for (i <- 0 to 13) {
+        oldgb.gb(i) = gameboard.gb(i)
+      }
+      val countStonesInMuld: Int = gameboard.gb(index)
+      //print("Balls = " + countStonesInMuld + "\n")
+      gameboard.gb(index) = 0
+      for (i <- 1 until countStonesInMuld + 1) {
+        if ((turn == 0 && (index + i) % 14 == 0) || (turn == 1 && (index + i) % 14 == p1)) {
+          //print("turn: " + round % 2 + " i = " + (index + i) + " x = " + countStonesInMuld + " skip\n")
+          //check if last hole > gameboard
+          if (index + i >= gameboard.gb.length) {
+            val y: Int = (index + i - gameboard.gb.length) % 14
+            gameboard.gb(y + 1) += 1
+            index += 1
+          } else {
+            gameboard.gb(index + i) += 1
+          }
+        } else {
+          if (index + i >= gameboard.gb.length) {
+            val y: Int = (index + i - gameboard.gb.length) % 14
+            gameboard.gb(y) += 1
+          } else {
+            gameboard.gb(index + i) += 1
+          }
+        }
+        if (i == countStonesInMuld) last = (index + i) % 14
+      }
+      undone = false
+
+      checkExtra(last)
+
+      this.round += 1
+      notifyObservers
+    }
+  }*/
+
+  def checkPlayerTurn: Boolean = {
+    if (round % 2 == 0) {
+      true
+    } else {
+      false
+    }
   }
 
   def collectEnemyStones(last: Int): Unit = {
     var own = false
-    if ((1 <= last) && (last <= 6) && board.round % 2 == 0) own = true
-    if ((8 <= last) && (last <= 13) && board.round % 2 == 1) own = true
+    if ((1 <= last) && (last <= 6) && round % 2 == 0) own = true
+    if ((8 <= last) && (last <= 13) && round % 2 == 1) own = true
     //print("\nown= " + own)
     if (own) {
       val idx = 14 - last
-      if (board.round % 2 == 0) {
-        board.gameboard(p1) += board.gameboard(idx)
-        board.gameboard(p1) += board.gameboard(last)
-        board.gameboard(idx) = 0
-        board.gameboard(last) = 0
+      if (round % 2 == 0) {
+        gameboard.gb(p1) += gameboard.gb(idx)
+        gameboard.gb(p1) += gameboard.gb(last)
+        gameboard.gb(idx) = 0
+        gameboard.gb(last) = 0
       } else {
-        board.gameboard(p2) += board.gameboard(idx)
-        board.gameboard(p2) += board.gameboard(last)
-        board.gameboard(idx) = 0
-        board.gameboard(last) = 0
+        gameboard.gb(p2) += gameboard.gb(idx)
+        gameboard.gb(p2) += gameboard.gb(last)
+        gameboard.gb(idx) = 0
+        gameboard.gb(last) = 0
       }
     }
   }
 
   def checkExtra(last: Int): Unit = {
-    //checkWin()
-    //print("checkExtra!\n")
-    if ((board.round % 2 == 1 && last == 0) || (board.round % 2 == 0 && last == 7)) {
-      //print("New Turn")
-      //tui.startTurn()
-      //notifyObservers
-
-      board.round -= 1
-      notifyObservers
-    }
-    if (board.gameboard(last) == 1) {
-      collectEnemyStones(last)
-      notifyObservers
-    }
-
+    if ((round % 2 == 1 && last == 0) || (round % 2 == 0 && last == 7)) round -= 1
+    if (gameboard.gb(last) == 1) collectEnemyStones(last)
+    notifyObservers
   }
 
-  def undo(): Unit = {
+  def undo(): Try[Unit] = Try {
     if (undone) {
-         throw new IllegalArgumentException("Es ist nur möglich einen Zug rückgängig zu machen")
-       } else {
-          var vBoard = new Gameboard
-          vBoard.gameboard = board.gameboard.clone()
-          board.gameboard = board.oldgb.clone()
-          board.oldgb = vBoard.gameboard.clone()
-          board.round -= 1
-          undone = true
-          print("undo \n")
-       }
-    //undoManager.undoStep
-    notifyObservers
+      Failure(throw new IllegalArgumentException("Es ist nur möglich einen Zug rückgängig zu machen1"))
+    } else {
+      gameStatus = UNDO
+      undoManager.undoMove.get
+      round -= 1
+      undone = true
+      notifyObservers
+    }
   }
 
-  def redo(): Unit = {
+  def redo(): Try[Unit] = Try {
     if(!undone) {
-      throw new IllegalArgumentException("Es ist nur möglich einen Zug vorwärts zu machen")
+      Failure(throw new IllegalArgumentException("Es ist nur möglich einen Zug vorwärts zu machen1"))
     } else {
-    val vBoard = new Gameboard
-    vBoard.gameboard = board.gameboard.clone()
-    board.gameboard = board.oldgb.clone()
-    board.oldgb = vBoard.gameboard.clone()
-    board.round += 1
-    print("redo \n")
-    undone = false
+      gameStatus = REDO
+      undoManager.redoMove.get
+      round += 1
+      undone = false
+      notifyObservers
     }
-    //undoManager.redoStep
-    notifyObservers
   }
 
   def reset(): Unit = {
-    board.boardInit(amountStones)
-    board.round = 0
+    gameboard.boardInit(amountStones) match {
+      case Some(_) => {
+        println("success: reset board")
+        gameStatus = RESET
+      }
+      case None => println("Error: Could not initialize board1!")
+    }
+    round = 0
     notifyObservers
   }
 
   def checkWin(): Unit = {
     var x: Int = 0
-    for (i <- 1 until 6 + 1) {
-      //print("i: " + i)
-      x += board.gameboard(i)
-    }
+    for (i <- 1 until 6 + 1) x += gameboard.gb(i)
     var y: Int = 0
-    for (i <- 1 until 6 + 1) {
-      //print("i2: " + (i + 7))
-      y += board.gameboard(i + 7)
-    }
+    for (i <- 1 until 6 + 1) y += gameboard.gb(i + 7)
     if (x == 0 || y == 0) win()
   }
 
   def win(): Unit = {
     var x: Int = 0
     for (i <- 1 until 6 + 1) {
-      x += board.gameboard(i)
+      x += gameboard.gb(i)
+      gameboard.gb(i) = 0
     }
     var y: Int = 0
-    for (i <- 1 until 6 + 1)
-      y += board.gameboard(i + p1)
-
-    board.gameboard(p1) += x
-    board.gameboard(p2) += y
-
+    for (i <- 1 until 6 + 1) {
+      y += gameboard.gb(i + p1)
+      gameboard.gb(i) = 0
+    }
+    gameboard.gb(p1) += x
+    gameboard.gb(p2) += y
     match {
-      case a if board.gameboard(p1) > board.gameboard(p2) =>
+      case a if gameboard.gb(p1) > gameboard.gb(p2) =>
         //print("P1: " + board.gameboard(p1) + " P2: " + board.gameboard(2) + "\n")
         print("WIN PLAYER 1\n")
         p1win = true
-      case a if board.gameboard(p2) > board.gameboard(p1) =>
+      case a if gameboard.gb(p2) > gameboard.gb(p1) =>
         //print("P1: " + board.gameboard(p1) + " P2: " + board.gameboard(p2) + "\n")
         print("WIN PLAYER 2\n")
         p2win = true
@@ -198,18 +272,24 @@ class Controller() extends Observable with ControllerInterface {
         p2win = true
         p1win = true
     }
+    gameStatus = WON
+    //notifyObservers
   }
 
-  def exit(): Unit = {
-    sys.exit(0)
-  }
+  def exit(): Unit = sys.exit(0)
 
-  def save: Unit = {
-    fileIO.save(board)
+  def save: Unit = Try[Unit] {
+    fileIO.save(this) match {
+      case Success(_) => println("Successfully written to Json-File!")
+      case Failure(e) => println(e)
+    }
   }
-
-  def load: Unit = {
-    fileIO.load(this)
+  def load: Unit = Try[Unit] {
+    fileIO.load(this) match {
+      case Success(v) => println("Successfully loaded gamestate from Json-File!")
+      case Failure(e) => println("Error: " + e)
+    }
   }
-
+  //TODO doesnt get updated properly
+  def statusText: String = GameStatus.message(gameStatus)
 }
