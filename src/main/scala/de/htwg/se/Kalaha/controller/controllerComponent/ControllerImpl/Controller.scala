@@ -269,9 +269,15 @@ class Controller() extends Observable with ControllerInterface with Publisher{
 
   def win(): Unit = {
     var x: Int = 0
-    for (i <- 1 until 6 + 1) x += gameboard.gb(i)
+    for (i <- 1 until 6 + 1) {
+      x += gameboard.gb(i)
+      gameboard.gb(i) = 0
+    }
     var y: Int = 0
-    for (i <- 1 until 6 + 1) y += gameboard.gb(i + p1)
+    for (i <- 1 until 6 + 1) {
+      y += gameboard.gb(i + p1)
+      gameboard.gb(i) = 0
+    }
     gameboard.gb(p1) += x
     gameboard.gb(p2) += y
     match {
@@ -289,7 +295,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
         p1win = true
     }
     gameStatus = WON
-    notifyObservers
+    //notifyObservers
   }
 
   def exit(): Unit = sys.exit(0)
