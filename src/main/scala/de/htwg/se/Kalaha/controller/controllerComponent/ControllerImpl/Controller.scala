@@ -24,8 +24,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
 
   var amountStones = 0
   var undone = false
-  var p1win = false
-  var p2win = false
+  var p1win, p2win = false
   val p1 = 7
   val p2 = 0
   private val undoManager = new UndoManagerImpl(this)

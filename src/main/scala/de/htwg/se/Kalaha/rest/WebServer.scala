@@ -7,6 +7,9 @@ import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import de.htwg.se.Kalaha.controller.controllerComponent.ControllerImpl.Controller
 
+import scala.concurrent.Future
+import scala.util._
+
 class WebServer(controller: Controller) {
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
@@ -29,7 +32,9 @@ class WebServer(controller: Controller) {
       path("move" / Segment) { s =>
         get {
           complete {
-            controller.tui.startTurn(s.charAt(0).toString.toInt, s.charAt(0).toString.toInt) //return values needs to be string
+//            controller.moveTui(s.charAt(0).toString.toInt, s.charAt(0).toString.toInt)
+            controller.tui.startTurn(s.charAt(0).toString.toInt, s.charAt(1).toString.toInt) //return values needs to be string
+
           }
         }
       }
