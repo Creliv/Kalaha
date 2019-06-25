@@ -169,6 +169,7 @@ def showGameboard(): String = {
 
 def checkWin(): Unit = {
   controller.checkWin()
+  print(showGameboard())
   if (controller.p2win && controller.p1win) {
     print("Unentschieden!\n")
     //controller.exit()
