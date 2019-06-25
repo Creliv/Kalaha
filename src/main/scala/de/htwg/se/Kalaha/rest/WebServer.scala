@@ -11,7 +11,7 @@ import de.htwg.se.Kalaha.view.tui.Tui
 import scala.concurrent.Future
 import scala.util._
 
-class WebServer() extends Controller {
+class WebServer(tui: Tui) extends Controller {
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
 
@@ -21,23 +21,23 @@ class WebServer() extends Controller {
     get {
       path("board") {
         complete {
-//          tui.showGameboard
-          "fisch"
+          tui.showGameboard
+//          "fisch"
         }
       }
     } ~
       path("help") {
         complete {
-//          tui.printHelp
-          "Kopf"
+          tui.printHelp
+//          "Kopf"
         }
       } ~
       path("move" / Segment) { s =>
         get {
           complete {
 //            controller.moveTui(s.charAt(0).toString.toInt, s.charAt(0).toString.toInt)
-//            tui.startTurn(s.charAt(0).toString.toInt, s.charAt(1).toString.toInt) //return values needs to be string
-              "Yo"
+            tui.startTurn(s.charAt(0).toString.toInt, s.charAt(1).toString.toInt) //return values needs to be string
+//              "Yo"
           }
         }
       }

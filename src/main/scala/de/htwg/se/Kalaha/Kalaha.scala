@@ -31,7 +31,7 @@ object Kalaha extends Observable{
   val tuiFuture = startUI ? startTui(controller)
   val tui = Await.result(tuiFuture, timeout.duration).asInstanceOf[Tui]
 
-  val wb = new WebServer()
+  val wb = new WebServer(tui)
   wb.start
 
   def main(args: Array[String]): Unit = {
