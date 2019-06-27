@@ -11,6 +11,8 @@ case class Gameboard(gb: Array[Int], controller: Controller) extends GameboardIn
   val p1 = 7
   val p2 = 0
 
+  var round = 0
+
   // deprecated function
   def boardInit(amountStonesStart: Int): Option[Unit] = {
     Some(setStones(amountStonesStart))
@@ -40,7 +42,7 @@ case class Gameboard(gb: Array[Int], controller: Controller) extends GameboardIn
   def doMove(input: Int, oldgb: Gameboard): Unit = {
     var index = input
     var last = 0
-    var turn = controller.round % 2
+    var turn = round % 2
     gb.copyToArray(oldgb.gb)
     //TODO check if mulde is empty.
     val countStonesInMuld: Int = gb(index)
@@ -66,22 +68,22 @@ case class Gameboard(gb: Array[Int], controller: Controller) extends GameboardIn
     }
     controller.undone = false
     checkExtra(last)
-    controller.round += 1
+    round += 1
   }
 
   def setBoardPieces(oldgb: Gameboard, vBoard: Gameboard): Unit = {
-    this.gb.copyToArray(vBoard.gb)
-    oldgb.gb.copyToArray(this.gb)
+    gb.copyToArray(vBoard.gb)
+    oldgb.gb.copyToArray(gb)
     vBoard.gb.copyToArray(oldgb.gb)
   }
 
   def collectEnemyStones(last: Int): Unit = {
     var own = false
-    if ((1 <= last) && (last <= 6) && controller.round % 2 == 0) own = true
-    if ((8 <= last) && (last <= 13) && controller.round % 2 == 1) own = true
+    if ((1 <= last) && (last <= 6) && round % 2 == 0) own = true
+    if ((8 <= last) && (last <= 13) && round % 2 == 1) own = true
     if (own) {
       val idx = 14 - last
-      if (controller.round % 2 == 0) {
+      if (round % 2 == 0) {
         gb(p1) += gb(idx)
         gb(p1) += gb(last)
         gb(idx) = 0
@@ -96,7 +98,7 @@ case class Gameboard(gb: Array[Int], controller: Controller) extends GameboardIn
   }
 
   def checkExtra(last: Int): Unit = {
-    if ((controller.round % 2 == 1 && last == 0) || (controller.round % 2 == 0 && last == 7)) controller.round -= 1
+    if ((round % 2 == 1 && last == 0) || (round % 2 == 0 && last == 7)) round -= 1
     if (gb(last) == 1) collectEnemyStones(last)
     controller.notifyObservers
   }

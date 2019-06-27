@@ -57,7 +57,7 @@ case class Tui(controller: Controller) extends Observer {
   }
 
   def checkPlayer: String = {
-    val turn = controller.round % 2
+    val turn = controller.gameboard.round % 2
     var str = ""
     if (turn == 0) {
       str += "\nSpieler " + Console.RED + "1 " + Console.RESET + "ist an der Reihe.\n"

@@ -29,7 +29,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
   val p2 = 0
   private val undoManager = new UndoManagerImpl(this)
   val fileIO = new FileIO
-  var round = 0
+
   var playerTurn1 = true
   var playerTurn2 = false
 
@@ -46,7 +46,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
     Future {
 
       var index = inputY
-      var turn = round % 2
+      var turn = gameboard.round % 2
 
       print(inputX)
       // turn >> playerTurn: Boolean
@@ -66,7 +66,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
     Future {
       var index = inputY
       //var index = 0
-      var turn = round % 2
+      var turn = gameboard.round % 2
 
       print(inputX)
       // turn >> playerTurn: Boolean
@@ -82,21 +82,13 @@ class Controller() extends Observable with ControllerInterface with Publisher{
     }
   }
 
-  def checkPlayerTurn: Boolean = {
-    if (round % 2 == 0) {
-      true
-    } else {
-      false
-    }
-  }
-
   def undo(): Try[Unit] = Try {
     if (undone) {
       Failure(throw new IllegalArgumentException("Es ist nur möglich einen Zug rückgängig zu machen1"))
     } else {
       gameStatus = UNDO
       undoManager.undoMove.get
-      round -= 1
+      gameboard.round -= 1
       undone = true
       notifyObservers
     }
@@ -108,7 +100,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
     } else {
       gameStatus = REDO
       undoManager.redoMove.get
-      round += 1
+      gameboard.round += 1
       undone = false
       notifyObservers
     }
@@ -122,20 +114,20 @@ class Controller() extends Observable with ControllerInterface with Publisher{
       }
       case None => println("Error: Could not initialize board1!")
     }
-    round = 0
+    gameboard.round = 0
     notifyObservers
   }
 
   def exit(): Unit = sys.exit(0)
 
-  def save: Unit = Try[Unit] {
-    fileIO.save(this) match {
+  def save(file: String): Unit = Try[Unit] {
+    fileIO.save(this, file) match {
       case Success(_) => println("Successfully written to Json-File!")
       case Failure(e) => println(e)
     }
   }
-  def load: Unit = Try[Unit] {
-    fileIO.load(this) match {
+  def load(file: String): Unit = Try[Unit] {
+    fileIO.load(this, file) match {
       case Success(v) => println("Successfully loaded gamestate from Json-File!")
       case Failure(e) => println("Error: " + e)
     }

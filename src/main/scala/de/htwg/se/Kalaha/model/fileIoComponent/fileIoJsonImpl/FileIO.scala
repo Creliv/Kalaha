@@ -14,12 +14,12 @@ import scala.util._
 class FileIO extends FileIOInterface {
   var round = 0
 
-  override def load(controller: Controller): Try[Unit] = {
+  override def load(controller: Controller, file: String): Try[Unit] = {
     Try {
-      val source1: String = Source.fromFile("D:\\board.json").getLines.mkString
+      val source1: String = Source.fromFile(file).getLines.mkString
       val json1: JsValue = Json.parse(source1)
       loadRound(json1, controller) match {
-        case Success(v) => controller.round = v
+        case Success(v) => controller.gameboard.round = v
         case Failure(e) => println("Error: Could not parse Json-File for <round>" + e)
       }
       loadStones(json1, controller) match {
@@ -62,9 +62,9 @@ class FileIO extends FileIOInterface {
     }
   }
 
-  override def save(controller: Controller): Try[Unit] = {
+  override def save(controller: Controller, file: String): Try[Unit] = {
     Try {
-      val pw = new PrintWriter(new File("D:\\board.json"))
+      val pw = new PrintWriter(new File(file))
       pw.write(Json.prettyPrint(toJson(controller)).toString)
       pw.close()
     }
@@ -73,7 +73,7 @@ class FileIO extends FileIOInterface {
   def toJson(controller: Controller): JsValue = {
     Json.obj(
       "gameboard" -> Json.obj(
-        "round" -> JsNumber(controller.round),
+        "round" -> JsNumber(controller.gameboard.round),
         "amountstones" -> JsNumber(controller.amountStones),
         "board" -> Json.arr(
           Json.obj(
