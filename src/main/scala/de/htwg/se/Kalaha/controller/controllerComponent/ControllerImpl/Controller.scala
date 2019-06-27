@@ -16,9 +16,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class Controller() extends Observable with ControllerInterface with Publisher{
   val stones: Int = 6
   val boardArray = Array(0, stones, stones, stones, stones, stones, stones, 0, stones, stones, stones, stones, stones, stones)
-  val gameboard = new Gameboard(new Array[Int](14))
-  val oldgb = new Gameboard(new Array[Int](14))
-  val vBoard = new Gameboard(new Array[Int](14))
+  val gameboard = new Gameboard(new Array[Int](14), this)
+  val oldgb = new Gameboard(new Array[Int](14), this)
+  val vBoard = new Gameboard(new Array[Int](14), this)
 
   var gameStatus: GameStatus = IDLE
 
@@ -52,10 +52,10 @@ class Controller() extends Observable with ControllerInterface with Publisher{
       // turn >> playerTurn: Boolean
       if (inputX == 0 && turn == 1) {
         index = 13 - inputY
-        doMove(index)
+        gameboard.doMove(index, oldgb)
       } else if (inputX == 1 && turn == 0) {
         index = inputY + 1
-        doMove(index)
+        gameboard.doMove(index, oldgb)
       } else {
         Failure(throw new Exception("Error: not your turn!"))
       }
@@ -72,99 +72,49 @@ class Controller() extends Observable with ControllerInterface with Publisher{
       // turn >> playerTurn: Boolean
       if (inputX - 1== 0 && turn == 1) {
         index = inputY + 8
-        doMove(index)
+        gameboard.doMove(index, oldgb)
       } else if (inputX + 1== 1 && turn == 0) {
         index = inputY + 1
-        doMove(index)
+        gameboard.doMove(index, oldgb)
       } else {
         Failure(throw new Exception("Error: not your turn!"))
       }
     }
   }
 
-  def doMove(input: Int) = {
-    var index = input
-    var last = 0
-    //print("index = " + index + "\n")
-    var turn = round % 2
-    //print("Turn = " + turn + "\n")
-    for (i <- 0 to 13) {
-      oldgb.gb(i) = gameboard.gb(i)
-    }
-    //TODO check if mulde is empty.
-    val countStonesInMuld: Int = gameboard.gb(index)
-    //print("Balls = " + countStonesInMuld + "\n")
-    gameboard.gb(index) = 0
-    for (i <- 1 until countStonesInMuld + 1) {
-      if ((turn == 0 && (index + i) % 14 == 0) || (turn == 1 && (index + i) % 14 == p1)) {
-        //print("turn: " + round % 2 + " i = " + (index + i) + " x = " + countStonesInMuld + " skip\n")
-        //check if last hole > gameboard
-        if (index + i >= gameboard.gb.length) {
-          val y: Int = (index + i - gameboard.gb.length) % 14
-          gameboard.gb(y + 1) += 1
-          index += 1
-        } else {
-          gameboard.gb(index + i) += 1
-        }
-      } else {
-        if (index + i >= gameboard.gb.length) {
-          val y: Int = (index + i - gameboard.gb.length) % 14
-          gameboard.gb(y) += 1
-        } else {
-          gameboard.gb(index + i) += 1
-        }
-      }
-      if (i == countStonesInMuld) last = (index + i) % 14
-    }
-    undone = false
-    checkExtra(last)
-    this.round += 1
-
-  }
-
-  /*def move(inputIndex: Int): Future[Unit] = {
-    Future {
-      var index = inputIndex
-
-      var last = 0
-      //print("index = " + index + "\n")
-      val turn = round % 2
-      //print("Turn = " + turn + "\n")
-      for (i <- 0 to 13) {
-        oldgb.gb(i) = gameboard.gb(i)
-      }
-      val countStonesInMuld: Int = gameboard.gb(index)
-      //print("Balls = " + countStonesInMuld + "\n")
-      gameboard.gb(index) = 0
-      for (i <- 1 until countStonesInMuld + 1) {
-        if ((turn == 0 && (index + i) % 14 == 0) || (turn == 1 && (index + i) % 14 == p1)) {
-          //print("turn: " + round % 2 + " i = " + (index + i) + " x = " + countStonesInMuld + " skip\n")
-          //check if last hole > gameboard
-          if (index + i >= gameboard.gb.length) {
-            val y: Int = (index + i - gameboard.gb.length) % 14
-            gameboard.gb(y + 1) += 1
-            index += 1
-          } else {
-            gameboard.gb(index + i) += 1
-          }
-        } else {
-          if (index + i >= gameboard.gb.length) {
-            val y: Int = (index + i - gameboard.gb.length) % 14
-            gameboard.gb(y) += 1
-          } else {
-            gameboard.gb(index + i) += 1
-          }
-        }
-        if (i == countStonesInMuld) last = (index + i) % 14
-      }
-      undone = false
-
-      checkExtra(last)
-
-      this.round += 1
-      notifyObservers
-    }
-  }*/
+//  def doMove(input: Int): Unit = {
+//    var index = input
+//    var last = 0
+//    var turn = round % 2
+//    for (i <- 0 to 13) {
+//      oldgb.gb(i) = gameboard.gb(i)
+//    }
+//    //TODO check if mulde is empty.
+//    val countStonesInMuld: Int = gameboard.gb(index)
+//    gameboard.gb(index) = 0
+//    for (i <- 1 until countStonesInMuld + 1) {
+//      if ((turn == 0 && (index + i) % 14 == 0) || (turn == 1 && (index + i) % 14 == p1)) {
+//        if (index + i >= gameboard.gb.size) {
+//          val y: Int = (index + i - gameboard.gb.size) % 14
+//          gameboard.gb(y + 1) += 1
+//          index += 1
+//        } else {
+//          gameboard.gb(index + i) += 1
+//        }
+//      } else {
+//        if (index + i >= gameboard.gb.size) {
+//          val y: Int = (index + i - gameboard.gb.size) % 14
+//          gameboard.gb(y) += 1
+//        } else {
+//          gameboard.gb(index + i) += 1
+//        }
+//      }
+//      if (i == countStonesInMuld) last = (index + i) % 14
+//    }
+//    undone = false
+//    checkExtra(last)
+//    this.round += 1
+//  }
 
   def checkPlayerTurn: Boolean = {
     if (round % 2 == 0) {
