@@ -7,7 +7,7 @@ import scala.util.Try
 
 trait FileIOInterface {
 
-  def load(controller: Controller): Try[Unit]
-  def save(controller: Controller): Try[Unit]
+  def load(controller: Controller, file: String): Try[Unit]
+  def save(controller: Controller, file: String): Try[Unit]
 
 }

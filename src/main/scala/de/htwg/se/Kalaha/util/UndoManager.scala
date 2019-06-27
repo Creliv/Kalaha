@@ -42,18 +42,10 @@ trait UndoManager {
 class UndoManagerImpl(controller: Controller) extends UndoManager {
 
   override def undoMove: Option[Unit] = {
-    Some(setBoardPieces)
+    Some(controller.gameboard.setBoardPieces(controller.oldgb, controller.vBoard))
   }
 
   override def redoMove: Option[Unit] = {
-    Some(setBoardPieces)
-  }
-
-  def setBoardPieces: Unit = {
-    for (i <- 0 to 13) {
-      controller.vBoard.gb(i) = controller.gameboard.gb(i)
-      controller.gameboard.gb(i) = controller.oldgb.gb(i)
-      controller.oldgb.gb(i) = controller.vBoard.gb(i)
-    }
+    Some(controller.gameboard.setBoardPieces(controller.oldgb, controller.vBoard))
   }
 }

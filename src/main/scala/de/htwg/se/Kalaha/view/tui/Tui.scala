@@ -32,7 +32,6 @@ case class Tui(controller: Controller) extends Observer {
       case "reset" => controller.reset
       case "exit" => controller.exit
       case p if input.startsWith("p") && input.length <= 3 => {
-        //println(startTurn(input.charAt(1).toString.toInt))
         print(startTurn(input.charAt(1).toString.toInt, input.charAt(2).toString.toInt))
       }
       case _ => println("Falsche Eingabe!")
@@ -58,7 +57,7 @@ case class Tui(controller: Controller) extends Observer {
   }
 
   def checkPlayer: String = {
-    val turn = controller.round % 2
+    val turn = controller.gameboard.round % 2
     var str = ""
     if (turn == 0) {
       str += "\nSpieler " + Console.RED + "1 " + Console.RESET + "ist an der Reihe.\n"
@@ -75,45 +74,6 @@ def startTurn(inputX: Int, inputY: Int): String = {
   }
   showGameboard()
 }
-
-  /*var turn = controller.round % 2
-  if (turn == 0) {
-    print("\nSpieler " + Console.RED + "1 " + Console.RESET + "ist an der Reihe.")
-  } else {
-    print("\nSpieler " + Console.BLUE + "2 " + Console.RESET + "ist an der Reihe.")
-  }
-  checkInputIFValid(input2) match {
-    case false =>
-      print("\nBitte richtige Werte angeben.")
-    case true =>
-      if (turn == 1) {
-        input2 += 7
-      }
-      controller.move(input2)
-  }
-  print(showGameboard)*/
-
-
-//def readUserInput(): Int = {
-//  val a = scala.io.StdIn.readInt()
-//  print("The value of a is " + a)
-//  a
-//}
-
-// check for empty field MULDE
-//def checkInputIFValid(index: Int): Boolean = index match {
-//  case x if 1 to 6 contains x =>
-//    var idx = index
-//    if (controller.round % 2 == 1) {
-//      idx += 7
-//    }
-//    if (controller.gameboard.gb(idx) > 0) {
-//      true
-//    } else {
-//      false
-//    }
-//  case _ => false
-//}
 
 def welcomeMsg(): Unit = {
   var s = ""
@@ -160,11 +120,10 @@ def showGameboard(): String = {
 }
 
 def checkWin(): Unit = {
-  controller.checkWin()
+  controller.gameboard.checkWin()
   print(showGameboard())
   if (controller.p2win && controller.p1win) {
     print("Unentschieden!\n")
-    //controller.exit()
   }
   if (controller.p1win) {
     print("Spieler 1 gewinnt mit " + controller.gameboard.gb(7) + "Punkten!\n")
@@ -194,8 +153,5 @@ override def update(): Unit = {
   print(checkPlayer)
   print(showGameboard)
   print(printHelp())
-  //checkWin()
 }
-
-//ruft theoretisch nur funktionen auf
 }

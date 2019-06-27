@@ -13,25 +13,17 @@ trait ControllerInterface {
 
   def moveTui(inputX: Int, inputY: Int): Future[Unit]
 
-  def collectEnemyStones(last: Int): Unit
-
-  def checkExtra(last: Int): Unit
-
   def undo(): Try[Unit]
 
   def redo(): Try[Unit]
 
   def reset(): Unit
 
-  def checkWin(): Unit
-
-  def win(): Unit
-
   def exit(): Unit
 
-  def save(): Unit
+  def save(file: String): Unit
 
-  def load(): Unit
+  def load(file: String): Unit
 
   def statusText(): String
 }

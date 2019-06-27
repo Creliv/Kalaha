@@ -16,9 +16,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class Controller() extends Observable with ControllerInterface with Publisher{
   val stones: Int = 6
   val boardArray = Array(0, stones, stones, stones, stones, stones, stones, 0, stones, stones, stones, stones, stones, stones)
-  val gameboard = new Gameboard(new Array[Int](14))
-  val oldgb = new Gameboard(new Array[Int](14))
-  val vBoard = new Gameboard(new Array[Int](14))
+  val gameboard = new Gameboard(new Array[Int](14), this)
+  val oldgb = new Gameboard(new Array[Int](14), this)
+  val vBoard = new Gameboard(new Array[Int](14), this)
 
   var gameStatus: GameStatus = IDLE
 
@@ -29,7 +29,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
   val p2 = 0
   private val undoManager = new UndoManagerImpl(this)
   val fileIO = new FileIO
-  var round = 0
+
   var playerTurn1 = true
   var playerTurn2 = false
 
@@ -46,16 +46,16 @@ class Controller() extends Observable with ControllerInterface with Publisher{
     Future {
 
       var index = inputY
-      var turn = round % 2
+      var turn = gameboard.round % 2
 
       print(inputX)
       // turn >> playerTurn: Boolean
       if (inputX == 0 && turn == 1) {
         index = 13 - inputY
-        doMove(index)
+        gameboard.doMove(index, oldgb)
       } else if (inputX == 1 && turn == 0) {
         index = inputY + 1
-        doMove(index)
+        gameboard.doMove(index, oldgb)
       } else {
         Failure(throw new Exception("Error: not your turn!"))
       }
@@ -66,139 +66,20 @@ class Controller() extends Observable with ControllerInterface with Publisher{
     Future {
       var index = inputY
       //var index = 0
-      var turn = round % 2
+      var turn = gameboard.round % 2
 
       print(inputX)
       // turn >> playerTurn: Boolean
       if (inputX - 1== 0 && turn == 1) {
         index = inputY + 8
-        doMove(index)
+        gameboard.doMove(index, oldgb)
       } else if (inputX + 1== 1 && turn == 0) {
         index = inputY + 1
-        doMove(index)
+        gameboard.doMove(index, oldgb)
       } else {
         Failure(throw new Exception("Error: not your turn!"))
       }
     }
-  }
-
-  def doMove(input: Int) = {
-    var index = input
-    var last = 0
-    //print("index = " + index + "\n")
-    var turn = round % 2
-    //print("Turn = " + turn + "\n")
-    for (i <- 0 to 13) {
-      oldgb.gb(i) = gameboard.gb(i)
-    }
-    //TODO check if mulde is empty.
-    val countStonesInMuld: Int = gameboard.gb(index)
-    //print("Balls = " + countStonesInMuld + "\n")
-    gameboard.gb(index) = 0
-    for (i <- 1 until countStonesInMuld + 1) {
-      if ((turn == 0 && (index + i) % 14 == 0) || (turn == 1 && (index + i) % 14 == p1)) {
-        //print("turn: " + round % 2 + " i = " + (index + i) + " x = " + countStonesInMuld + " skip\n")
-        //check if last hole > gameboard
-        if (index + i >= gameboard.gb.length) {
-          val y: Int = (index + i - gameboard.gb.length) % 14
-          gameboard.gb(y + 1) += 1
-          index += 1
-        } else {
-          gameboard.gb(index + i) += 1
-        }
-      } else {
-        if (index + i >= gameboard.gb.length) {
-          val y: Int = (index + i - gameboard.gb.length) % 14
-          gameboard.gb(y) += 1
-        } else {
-          gameboard.gb(index + i) += 1
-        }
-      }
-      if (i == countStonesInMuld) last = (index + i) % 14
-    }
-    undone = false
-    checkExtra(last)
-    this.round += 1
-
-  }
-
-  /*def move(inputIndex: Int): Future[Unit] = {
-    Future {
-      var index = inputIndex
-
-      var last = 0
-      //print("index = " + index + "\n")
-      val turn = round % 2
-      //print("Turn = " + turn + "\n")
-      for (i <- 0 to 13) {
-        oldgb.gb(i) = gameboard.gb(i)
-      }
-      val countStonesInMuld: Int = gameboard.gb(index)
-      //print("Balls = " + countStonesInMuld + "\n")
-      gameboard.gb(index) = 0
-      for (i <- 1 until countStonesInMuld + 1) {
-        if ((turn == 0 && (index + i) % 14 == 0) || (turn == 1 && (index + i) % 14 == p1)) {
-          //print("turn: " + round % 2 + " i = " + (index + i) + " x = " + countStonesInMuld + " skip\n")
-          //check if last hole > gameboard
-          if (index + i >= gameboard.gb.length) {
-            val y: Int = (index + i - gameboard.gb.length) % 14
-            gameboard.gb(y + 1) += 1
-            index += 1
-          } else {
-            gameboard.gb(index + i) += 1
-          }
-        } else {
-          if (index + i >= gameboard.gb.length) {
-            val y: Int = (index + i - gameboard.gb.length) % 14
-            gameboard.gb(y) += 1
-          } else {
-            gameboard.gb(index + i) += 1
-          }
-        }
-        if (i == countStonesInMuld) last = (index + i) % 14
-      }
-      undone = false
-
-      checkExtra(last)
-
-      this.round += 1
-      notifyObservers
-    }
-  }*/
-
-  def checkPlayerTurn: Boolean = {
-    if (round % 2 == 0) {
-      true
-    } else {
-      false
-    }
-  }
-
-  def collectEnemyStones(last: Int): Unit = {
-    var own = false
-    if ((1 <= last) && (last <= 6) && round % 2 == 0) own = true
-    if ((8 <= last) && (last <= 13) && round % 2 == 1) own = true
-    //print("\nown= " + own)
-    if (own) {
-      val idx = 14 - last
-      if (round % 2 == 0) {
-        gameboard.gb(p1) += gameboard.gb(idx)
-        gameboard.gb(p1) += gameboard.gb(last)
-        gameboard.gb(idx) = 0
-        gameboard.gb(last) = 0
-      } else {
-        gameboard.gb(p2) += gameboard.gb(idx)
-        gameboard.gb(p2) += gameboard.gb(last)
-        gameboard.gb(idx) = 0
-        gameboard.gb(last) = 0
-      }
-    }
-  }
-
-  def checkExtra(last: Int): Unit = {
-    if ((round % 2 == 1 && last == 0) || (round % 2 == 0 && last == 7)) round -= 1
-    if (gameboard.gb(last) == 1) collectEnemyStones(last)
-    notifyObservers
   }
 
   def undo(): Try[Unit] = Try {
@@ -207,7 +88,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
     } else {
       gameStatus = UNDO
       undoManager.undoMove.get
-      round -= 1
+      gameboard.round -= 1
       undone = true
       notifyObservers
     }
@@ -219,7 +100,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
     } else {
       gameStatus = REDO
       undoManager.redoMove.get
-      round += 1
+      gameboard.round += 1
       undone = false
       notifyObservers
     }
@@ -233,59 +114,20 @@ class Controller() extends Observable with ControllerInterface with Publisher{
       }
       case None => println("Error: Could not initialize board1!")
     }
-    round = 0
+    gameboard.round = 0
     notifyObservers
-  }
-
-  def checkWin(): Unit = {
-    var x: Int = 0
-    for (i <- 1 until 6 + 1) x += gameboard.gb(i)
-    var y: Int = 0
-    for (i <- 1 until 6 + 1) y += gameboard.gb(i + 7)
-    if (x == 0 || y == 0) win()
-  }
-
-  def win(): Unit = {
-    var x: Int = 0
-    for (i <- 1 until 6 + 1) {
-      x += gameboard.gb(i)
-      gameboard.gb(i) = 0
-    }
-    var y: Int = 0
-    for (i <- 1 until 6 + 1) {
-      y += gameboard.gb(i + p1)
-      gameboard.gb(i) = 0
-    }
-    gameboard.gb(p1) += x
-    gameboard.gb(p2) += y
-    match {
-      case a if gameboard.gb(p1) > gameboard.gb(p2) =>
-        //print("P1: " + board.gameboard(p1) + " P2: " + board.gameboard(2) + "\n")
-        print("WIN PLAYER 1\n")
-        p1win = true
-      case a if gameboard.gb(p2) > gameboard.gb(p1) =>
-        //print("P1: " + board.gameboard(p1) + " P2: " + board.gameboard(p2) + "\n")
-        print("WIN PLAYER 2\n")
-        p2win = true
-      case _ =>
-        print("TIE\n")
-        p2win = true
-        p1win = true
-    }
-    gameStatus = WON
-    //notifyObservers
   }
 
   def exit(): Unit = sys.exit(0)
 
-  def save: Unit = Try[Unit] {
-    fileIO.save(this) match {
+  def save(file: String): Unit = Try[Unit] {
+    fileIO.save(this, file) match {
       case Success(_) => println("Successfully written to Json-File!")
       case Failure(e) => println(e)
     }
   }
-  def load: Unit = Try[Unit] {
-    fileIO.load(this) match {
+  def load(file: String): Unit = Try[Unit] {
+    fileIO.load(this, file) match {
       case Success(v) => println("Successfully loaded gamestate from Json-File!")
       case Failure(e) => println("Error: " + e)
     }

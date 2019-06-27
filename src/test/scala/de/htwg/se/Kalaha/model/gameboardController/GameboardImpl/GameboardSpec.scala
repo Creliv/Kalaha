@@ -10,7 +10,7 @@ import play.api.libs.json.{JsNumber, JsValue, Json}
 @RunWith(classOf[JUnitRunner])
 class GameboardSpec extends WordSpec with Matchers {
   "A GameBoard" when {
-    val board = Gameboard(Array(14))
+    val board = Gameboard(Array(14), new Controller)
     "initialized" should {
       "new init" in {
         //board.boardInit()

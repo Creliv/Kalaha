@@ -28,6 +28,8 @@ class Gui(controller: Controller) extends Frame with Observer {
 
   setButtons()
 
+  val fc = new FileChooser()
+
   val statusline = new TextField(controller.statusText, 20)
 
   val textPanel: TextField = new TextField() {
@@ -68,16 +70,16 @@ class Gui(controller: Controller) extends Frame with Observer {
         reset
       })
       contents += new MenuItem(Action("Als JSON speichern") {
-        Try(controller.save)
+        save
       })
       contents += new MenuItem(Action("Spiel laden") {
-        Try(controller.load)
+        load
       })
       contents += new MenuItem(Action("Spielregeln") {
         help()
       })
       contents += new MenuItem(Action("Beenden") {
-        exit()
+        exit
       })
     }
     contents += new Menu("Edit") {
@@ -178,7 +180,7 @@ class Gui(controller: Controller) extends Frame with Observer {
   }
 
   def redraw(): Unit = {
-    if (controller.round % 2 == 0) {
+    if (controller.gameboard.round % 2 == 0) {
       textPanel.background = Color.decode("#cc2023")
       str = "Spieler 1 ist am Zug"
       textPanel.text_=(str)
@@ -197,22 +199,34 @@ class Gui(controller: Controller) extends Frame with Observer {
     repaint
   }
 
-  def exit(): Unit = {
+  def exit = {
     val dia = Dialog.showConfirmation(contents.head, "Sind sie sicher das sie beenden wollen?", "Beenden", optionType = Dialog.Options.YesNo)
     if (dia == Dialog.Result.Yes) {
       controller.exit()
     }
   }
 
-  def reset(): Unit = {
+  def reset = {
     val dia = Dialog.showConfirmation(contents.head, "Sind sie sicher das sie neu starten wollen?", "Neues Spiel", optionType = Dialog.Options.YesNo)
     if (dia == Dialog.Result.Yes) {
       controller.reset()
     }
   }
 
+  def save = {
+    fc.showSaveDialog(contents.last)
+    val file = fc.selectedFile.getAbsolutePath
+    Try(controller.save(file))
+  }
+
+  def load = {
+    fc.showSaveDialog(contents.last)
+    val file = fc.selectedFile.getAbsolutePath
+    Try(controller.load(file))
+  }
+
   def checkWin(): Unit = {
-    controller.checkWin()
+    controller.gameboard.checkWin()
     redraw()
     if (controller.p2win && controller.p1win) {
       val dia = Dialog.showConfirmation(contents.head, "Unentschieden!", "Spielende", optionType = Dialog.Options.Default)
