@@ -10,6 +10,17 @@ trait GameboardInterface {
 
   def setBoard(newBoard: Array[Int]): Option[Unit]
 
-  override def toString: String
+  def setStones(amountStonesStart: Int): Unit
 
+  def doMove(input: Int, oldgb: Gameboard): Unit
+
+  def setBoardPieces(oldgb: Gameboard, vBoard: Gameboard): Unit
+
+  def collectEnemyStones(last: Int): Unit
+
+  def checkExtra(last: Int): Unit
+
+  def checkWin(): Unit
+
+  def win(): Unit
 }

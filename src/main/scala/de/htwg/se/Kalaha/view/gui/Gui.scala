@@ -212,7 +212,7 @@ class Gui(controller: Controller) extends Frame with Observer {
   }
 
   def checkWin(): Unit = {
-    controller.checkWin()
+    controller.gameboard.checkWin()
     redraw()
     if (controller.p2win && controller.p1win) {
       val dia = Dialog.showConfirmation(contents.head, "Unentschieden!", "Spielende", optionType = Dialog.Options.Default)
