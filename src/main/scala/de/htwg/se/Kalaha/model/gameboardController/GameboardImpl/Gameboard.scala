@@ -40,7 +40,6 @@ case class Gameboard(gb: Array[Int], controller: Controller) extends GameboardIn
     var index = input
     var last = 0
     var turn = controller.round % 2
-    //TODO fix save
     gb.copyToArray(oldgb.gb)
     //TODO check if mulde is empty.
     val countStonesInMuld: Int = gb(index)
@@ -67,6 +66,12 @@ case class Gameboard(gb: Array[Int], controller: Controller) extends GameboardIn
     controller.undone = false
     controller.checkExtra(last)
     controller.round += 1
+  }
+
+  def setBoardPieces(oldgb: Gameboard, vBoard: Gameboard): Unit = {
+    this.gb.copyToArray(vBoard.gb)
+    oldgb.gb.copyToArray(this.gb)
+    vBoard.gb.copyToArray(oldgb.gb)
   }
 
   /*override def toString: String = {
