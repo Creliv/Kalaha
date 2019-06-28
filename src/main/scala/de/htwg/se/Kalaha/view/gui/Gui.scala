@@ -110,6 +110,15 @@ class Gui(controller: Controller) extends Frame with Observer {
         redraw()
       })
     }
+    contents += new Menu("Slick") {
+      mnemonic = Key.S
+      contents += new MenuItem(Action("Spiel speichern") {
+        saveSlick
+      })
+      contents += new MenuItem(Action("Spiel laden") {
+        loadSlick
+      })
+    }
   }
   visible = true
 
@@ -146,36 +155,6 @@ class Gui(controller: Controller) extends Frame with Observer {
           case Success(_) => controller.notifyObservers()
           case Failure(e) => val dia = Dialog.showConfirmation(contents.head, e, "Hinweis", optionType = Dialog.Options.Default)
         }
-
-//        if (controller.round % 2 == 0) {
-//          if (x == 0) { // y + 0
-//            val dia = Dialog.showConfirmation(contents.head, "Falscher Spieler", "Hinweis", optionType = Dialog.Options.Default)
-//          } else {
-//            if(controller.gameboard.gb(y + 1) == 0) {
-//              val dia = Dialog.showConfirmation(contents.head, "Feld darf nicht leer sein", "Hinweis", optionType = Dialog.Options.Default)
-//            } else {
-//              controller.move(y + 1).onComplete {
-//                case Success(v) => println("")
-//                case Failure(e) => val dia = Dialog.showConfirmation(contents.head, e, "Hinweis", optionType = Dialog.Options.Default)
-//              }
-//              redraw()
-//            }
-//          }
-//        } else if (controller.round % 2 == 1) {
-//          if (x == 1) { // y + 7
-//            val dia = Dialog.showConfirmation(contents.head, "Falscher Spieler", "Hinweis", optionType = Dialog.Options.Default)
-//          } else {
-//            if (controller.gameboard.gb(13 - y) == 0) {
-//              val dia = Dialog.showConfirmation(contents.head, "Feld darf nicht leer sein", "Hinweis", optionType = Dialog.Options.Default)
-//            } else {
-//              controller.move(13 - y).onComplete {
-//                case Success(v) => println("")
-//                case Failure(e) => val dia = Dialog.showConfirmation(contents.head, e, "Hinweis", optionType = Dialog.Options.Default)
-//              }
-//              redraw()
-//            }
-//          }
-//        }
     }
   }
 
@@ -214,15 +193,27 @@ class Gui(controller: Controller) extends Frame with Observer {
   }
 
   def save = {
-    fc.showSaveDialog(contents.last)
-    val file = fc.selectedFile.getAbsolutePath
-    Try(controller.save(file))
+    val result = fc.showSaveDialog(contents.last)
+    if(result == FileChooser.Result.Approve) {
+      val path = fc.selectedFile.getAbsolutePath + ".json"
+      Try(controller.save(path))
+    }
   }
 
   def load = {
-    fc.showSaveDialog(contents.last)
-    val file = fc.selectedFile.getAbsolutePath
-    Try(controller.load(file))
+    val result = fc.showSaveDialog(contents.last)
+    if(result == FileChooser.Result.Approve) {
+      val path = fc.selectedFile.getAbsolutePath
+      Try(controller.load(path))
+    }
+  }
+
+  def saveSlick = {
+    controller.slicktestSave(1)
+  }
+
+  def loadSlick = {
+    controller.slicktestLoad(1)
   }
 
   def checkWin(): Unit = {

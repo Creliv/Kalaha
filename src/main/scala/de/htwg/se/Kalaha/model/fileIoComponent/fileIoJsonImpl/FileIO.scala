@@ -2,10 +2,8 @@ package de.htwg.se.Kalaha.model.fileIoComponent.fileIoJsonImpl
 
 import java.io.{File, PrintWriter}
 
-import com.fasterxml.jackson.core.JsonParseException
 import de.htwg.se.Kalaha.controller.controllerComponent.ControllerImpl.Controller
 import de.htwg.se.Kalaha.model.fileIoComponent.FileIOInterface
-import de.htwg.se.Kalaha.model.gameboardController.GameboardImpl.Gameboard
 import play.api.libs.json.{JsNumber, JsValue, Json}
 
 import scala.io.Source
@@ -14,9 +12,9 @@ import scala.util._
 class FileIO extends FileIOInterface {
   var round = 0
 
-  override def load(controller: Controller, file: String): Try[Unit] = {
+  override def load(controller: Controller, path: String): Try[Unit] = {
     Try {
-      val source1: String = Source.fromFile(file).getLines.mkString
+      val source1: String = Source.fromFile(path).getLines.mkString
       val json1: JsValue = Json.parse(source1)
       loadRound(json1, controller) match {
         case Success(v) => controller.gameboard.round = v
@@ -62,9 +60,9 @@ class FileIO extends FileIOInterface {
     }
   }
 
-  override def save(controller: Controller, file: String): Try[Unit] = {
+  override def save(controller: Controller, path: String): Try[Unit] = {
     Try {
-      val pw = new PrintWriter(new File(file))
+      val pw = new PrintWriter(new File(path))
       pw.write(Json.prettyPrint(toJson(controller)).toString)
       pw.close()
     }

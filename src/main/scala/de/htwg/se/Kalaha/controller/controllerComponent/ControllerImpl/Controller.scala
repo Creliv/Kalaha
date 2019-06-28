@@ -2,11 +2,10 @@ package de.htwg.se.Kalaha.controller.controllerComponent.ControllerImpl
 
 import de.htwg.se.Kalaha.controller.controllerComponent.{ControllerInterface, GameStatus}
 import de.htwg.se.Kalaha.controller.controllerComponent.GameStatus._
+import de.htwg.se.Kalaha.model.doa.slick.SlickImpl
 import de.htwg.se.Kalaha.model.gameboardController.GameboardImpl.Gameboard
 import de.htwg.se.Kalaha.model.fileIoComponent.fileIoJsonImpl.FileIO
 import de.htwg.se.Kalaha.util.{Observable, UndoManagerImpl}
-import de.htwg.se.Kalaha.view.gui.Gui
-import de.htwg.se.Kalaha.view.tui.Tui
 
 import scala.swing.Publisher
 import scala.util._
@@ -120,18 +119,31 @@ class Controller() extends Observable with ControllerInterface with Publisher{
 
   def exit(): Unit = sys.exit(0)
 
-  def save(file: String): Unit = Try[Unit] {
-    fileIO.save(this, file) match {
+  def save(path: String): Unit = Try[Unit] {
+    fileIO.save(this, path) match {
       case Success(_) => println("Successfully written to Json-File!")
       case Failure(e) => println(e)
     }
   }
-  def load(file: String): Unit = Try[Unit] {
-    fileIO.load(this, file) match {
+  def load(path: String): Unit = Try[Unit] {
+    fileIO.load(this, path) match {
       case Success(v) => println("Successfully loaded gamestate from Json-File!")
       case Failure(e) => println("Error: " + e)
     }
   }
   //TODO doesnt get updated properly
   def statusText: String = GameStatus.message(gameStatus)
+
+  def slicktestLoad(id: Int) = {
+//    gameboard.loadSlick(id).onComplete {
+//      case Success(board) => {
+//
+//      }
+//    }
+    gameboard.loadSlick(id)
+  }
+
+  def slicktestSave(id: Int) = {
+    gameboard.saveSlick(id)
+  }
 }
