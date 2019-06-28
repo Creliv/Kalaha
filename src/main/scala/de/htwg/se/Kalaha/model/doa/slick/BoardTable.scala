@@ -2,7 +2,6 @@ package de.htwg.se.Kalaha.model.doa.slick
 
 import slick.jdbc.H2Profile.api._
 
-case class BoardConfig(id: Int, )
 
 class BoardTable(tag: Tag) extends Table[(Int, Int, Int, String)](tag, "boardvalues"){
   //save gameboard array
