@@ -8,18 +8,18 @@ import scala.concurrent.{Future, Await}
 
 import com.typesafe.config.ConfigFactory
 
-object slickImpl extends DoaInterface{
+object SlickImpl extends DoaInterface{
 
   private val conf = ConfigFactory.load
   private val db = Database.forConfig("h2mem1", conf)
   private val board = TableQuery[BoardTable]
 
-  def findById(id: Int): Future[(Int, Int, Int, String)] = {
+  override def findById(id: Int): Future[(Int, Int, Int, String)] = {
     val q = db.run(board.filter(f => f.id === id).result.head)
     q
   }
 
-  def insert(id: Int, aStones: Int, round: Int, boardvalues: String) = {
+  override def insert(id: Int, aStones: Int, round: Int, boardvalues: String) = {
     Await.result(db.run(board.schema.createIfNotExists), Duration.Inf)
     db.run(board += (id, aStones, round, boardvalues))
 //    val insertActions = DBIO.seq(
@@ -28,11 +28,11 @@ object slickImpl extends DoaInterface{
     println("yooo")
   }
 
-  def update(id: Int, aStones: Int, round: Int, boardArray: String) = {
+  override def update(id: Int, aStones: Int, round: Int, boardArray: String) = {
     db.run(board.filter(f => f.id === id).update(id, aStones, round, boardArray))
   }
 
-  def delete(id: Int) = {
+  override def delete(id: Int) = {
     db.run(board.filter(f => f.id === id).delete)
   }
 }

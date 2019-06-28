@@ -2,7 +2,7 @@ package de.htwg.se.Kalaha.controller.controllerComponent.ControllerImpl
 
 import de.htwg.se.Kalaha.controller.controllerComponent.{ControllerInterface, GameStatus}
 import de.htwg.se.Kalaha.controller.controllerComponent.GameStatus._
-import de.htwg.se.Kalaha.model.doa.slick.slickImpl
+import de.htwg.se.Kalaha.model.doa.slick.SlickImpl
 import de.htwg.se.Kalaha.model.gameboardController.GameboardImpl.Gameboard
 import de.htwg.se.Kalaha.model.fileIoComponent.fileIoJsonImpl.FileIO
 import de.htwg.se.Kalaha.util.{Observable, UndoManagerImpl}

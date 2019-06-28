@@ -75,12 +75,6 @@ class Gui(controller: Controller) extends Frame with Observer {
       contents += new MenuItem(Action("Spiel laden") {
         load
       })
-      contents += new MenuItem(Action("Auf Slick DB speichern") {
-        saveSlick
-      })
-      contents += new MenuItem(Action("Von Slick DB laden") {
-        loadSlick
-      })
       contents += new MenuItem(Action("Spielregeln") {
         help()
       })
@@ -114,6 +108,15 @@ class Gui(controller: Controller) extends Frame with Observer {
         controller.updateStones(6)
         reset
         redraw()
+      })
+    }
+    contents += new Menu("Slick") {
+      mnemonic = Key.S
+      contents += new MenuItem(Action("Spiel speichern") {
+        saveSlick
+      })
+      contents += new MenuItem(Action("Spiel laden") {
+        loadSlick
       })
     }
   }
