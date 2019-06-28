@@ -6,10 +6,14 @@ import slick.jdbc.H2Profile.api._
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Future, Await}
 
+import com.typesafe.config.ConfigFactory
+
 object slickImpl extends DoaInterface{
 
-  private val db = Database.forConfig("h2mem1")
+  private val conf = ConfigFactory.load
+  private val db = Database.forConfig("h2mem1", conf)
   private val board = TableQuery[BoardTable]
+
 
 
   // TODO fetch values by ID
@@ -22,13 +26,14 @@ object slickImpl extends DoaInterface{
   }
 
   // TODO insert amountStones, ronud, arrayValues as String
-  def insert(id: Int, aStones: Int, round: Int, boardArray: String) = {
+  def insert(id: Int, aStones: Int, round: Int, boardvalues: String) = {
     //TODO
     Await.result(db.run(board.schema.createIfNotExists), Duration.Inf)
-    db.run(board += (id, aStones, round, boardArray))
+    db.run(board += (id, aStones, round, boardvalues))
 //    val insertActions = DBIO.seq(
 //      board += (id, aStones, round, boardArray)
 //    )
+    println("yooo")
   }
 
   // TODO update column by ID

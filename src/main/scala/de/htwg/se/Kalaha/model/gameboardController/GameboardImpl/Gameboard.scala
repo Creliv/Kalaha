@@ -151,6 +151,8 @@ case class Gameboard(gb: Array[Int], controller: Controller) extends GameboardIn
     slickImpl.findById(id).onComplete {
       case Success(boardValues) => {
         //TODO parse
+        println("aye")
+        println(boardValues)
       }
       case Failure(e) => println("Error: Failed to load game id" + e)
     }

@@ -8,8 +8,8 @@ class BoardTable(tag: Tag) extends Table[(Int, Int, Int, String)](tag, "boardval
   def id = column[Int]("ID", O.PrimaryKey)
   def stones = column[Int]("ASTONES")
   def round = column[Int]("ROUND")
-  def board = column[String]("BOARD")
+  def boardvalues = column[String]("BOARDVALUES")
 
 
-  def * = (id, stones, round, board)
+  def * = (id, stones, round, boardvalues)
 }

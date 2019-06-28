@@ -140,6 +140,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
 //
 //      }
 //    }
+    gameboard.loadSlick(id)
   }
 
   def slicktestSave(id: Int) = {
