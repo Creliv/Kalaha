@@ -192,10 +192,9 @@ class Gui(controller: Controller) extends Frame with Observer {
   def save = {
     val result = fc.showSaveDialog(contents.last)
     if(result == FileChooser.Result.Approve) {
-      val path = fc.selectedFile.getAbsolutePath
+      val path = fc.selectedFile.getAbsolutePath + ".json"
       Try(controller.save(path))
     }
-
   }
 
   def load = {

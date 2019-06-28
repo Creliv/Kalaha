@@ -147,20 +147,21 @@ case class Gameboard(gb: Array[Int], controller: Controller) extends GameboardIn
 
   def loadSlick(id: Int) = {
     import scala.concurrent.ExecutionContext.Implicits.global
-    // TODO parse return value from findByID slick
     slickImpl.findById(id).onComplete {
       case Success(boardValues) => {
         //TODO parse
-        println("aye")
-        println(boardValues)
+        val array = boardValues._4.split(";").map(_.toInt)
+        boardInit(array)
+        round = boardValues._3
+        controller.amountStones = boardValues._2
+        controller.notifyObservers()
       }
       case Failure(e) => println("Error: Failed to load game id" + e)
     }
   }
 
   def saveSlick(id: Int) = {
-    // TODO save id, aStones, round, boardArray via insert
-    slickImpl.insert(id, controller.amountStones, round, gb.toString)
+    slickImpl.insert(id, controller.amountStones, round, gb.mkString(";"))
   }
 
 
