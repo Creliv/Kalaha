@@ -149,7 +149,6 @@ case class Gameboard(gb: Array[Int], controller: Controller) extends GameboardIn
     import scala.concurrent.ExecutionContext.Implicits.global
     slickImpl.findById(id).onComplete {
       case Success(boardValues) => {
-        //TODO parse
         val array = boardValues._4.split(";").map(_.toInt)
         boardInit(array)
         round = boardValues._3
