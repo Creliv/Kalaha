@@ -2,7 +2,10 @@ package de.htwg.se.Kalaha.model.gameboardController.GameboardImpl
 
 import de.htwg.se.Kalaha.controller.controllerComponent.ControllerImpl.Controller
 import de.htwg.se.Kalaha.controller.controllerComponent.GameStatus.WON
+import de.htwg.se.Kalaha.model.doa.slick.slickImpl
 import de.htwg.se.Kalaha.model.gameboardController.GameboardInterface
+
+import scala.util.{Success, Failure}
 
 case class Gameboard(gb: Array[Int], controller: Controller) extends GameboardInterface {
   val SIZE = 14
@@ -140,6 +143,22 @@ case class Gameboard(gb: Array[Int], controller: Controller) extends GameboardIn
     }
     controller.gameStatus = WON
     //notifyObservers
+  }
+
+  def loadSlick(id: Int) = {
+    import scala.concurrent.ExecutionContext.Implicits.global
+    // TODO parse return value from findByID slick
+    slickImpl.findById(id).onComplete {
+      case Success(boardValues) => {
+        //TODO parse
+      }
+      case Failure(e) => println("Error: Failed to load game id" + e)
+    }
+  }
+
+  def saveSlick(id: Int) = {
+    // TODO save id, aStones, round, boardArray via insert
+    slickImpl.insert(id, controller.amountStones, round, gb.toString)
   }
 
 

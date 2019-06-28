@@ -2,9 +2,9 @@ package de.htwg.se.Kalaha.controller.controllerComponent.ControllerImpl
 
 import de.htwg.se.Kalaha.controller.controllerComponent.{ControllerInterface, GameStatus}
 import de.htwg.se.Kalaha.controller.controllerComponent.GameStatus._
+import de.htwg.se.Kalaha.model.doa.slick.slickImpl
 import de.htwg.se.Kalaha.model.gameboardController.GameboardImpl.Gameboard
 import de.htwg.se.Kalaha.model.fileIoComponent.fileIoJsonImpl.FileIO
-import de.htwg.se.Kalaha.model.gameboardController.GameboardInterface
 import de.htwg.se.Kalaha.util.{Observable, UndoManagerImpl}
 
 import scala.swing.Publisher
@@ -133,4 +133,16 @@ class Controller() extends Observable with ControllerInterface with Publisher{
   }
   //TODO doesnt get updated properly
   def statusText: String = GameStatus.message(gameStatus)
+
+  def slicktestLoad(id: Int) = {
+//    gameboard.loadSlick(id).onComplete {
+//      case Success(board) => {
+//
+//      }
+//    }
+  }
+
+  def slicktestSave(id: Int) = {
+    gameboard.saveSlick(id)
+  }
 }

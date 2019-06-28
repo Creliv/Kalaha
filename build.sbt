@@ -37,4 +37,6 @@ libraryDependencies += "com.typesafe.akka" %% "akka-stream" % "2.5.19"
 
 libraryDependencies += "com.typesafe.slick" %% "slick" % "3.3.1"
 
+libraryDependencies += "org.slf4j" % "slf4j-nop" % "1.6.4"
+
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.2"
