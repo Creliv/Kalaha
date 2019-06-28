@@ -1,4 +1,4 @@
-name          := "Kalaha"
+name          := "KalahaMicro"
 organization  := "de.htwg.se"
 version       := "1.0.0"
 scalaVersion  := "2.12.7"

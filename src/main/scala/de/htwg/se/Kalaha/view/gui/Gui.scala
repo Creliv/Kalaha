@@ -2,14 +2,20 @@ package de.htwg.se.Kalaha.view.gui
 
 import java.awt.{Color, Font}
 
+import akka.actor.ActorSystem
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.model.HttpCharsets._
+import akka.http.scaladsl.model.HttpMethods._
+import akka.http.scaladsl.model.MediaTypes._
+import akka.http.scaladsl.model._
 import de.htwg.se.Kalaha.controller.controllerComponent.ControllerImpl.Controller
 import de.htwg.se.Kalaha.util.{Observer, Point}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.postfixOps
 import scala.swing._
 import scala.swing.event._
 import scala.util._
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class Gui(controller: Controller) extends Frame with Observer {
 
@@ -74,6 +80,9 @@ class Gui(controller: Controller) extends Frame with Observer {
       })
       contents += new MenuItem(Action("Spiel laden") {
         load
+      })
+      contents += new MenuItem(Action("Microservice laden") {
+        micro
       })
       contents += new MenuItem(Action("Spielregeln") {
         help()
@@ -199,27 +208,27 @@ class Gui(controller: Controller) extends Frame with Observer {
     repaint
   }
 
-  def exit = {
+  def exit(): Unit = {
     val dia = Dialog.showConfirmation(contents.head, "Sind sie sicher das sie beenden wollen?", "Beenden", optionType = Dialog.Options.YesNo)
     if (dia == Dialog.Result.Yes) {
       controller.exit()
     }
   }
 
-  def reset = {
+  def reset: Unit = {
     val dia = Dialog.showConfirmation(contents.head, "Sind sie sicher das sie neu starten wollen?", "Neues Spiel", optionType = Dialog.Options.YesNo)
     if (dia == Dialog.Result.Yes) {
       controller.reset()
     }
   }
 
-  def save = {
+  def save: Try[Unit] = {
     fc.showSaveDialog(contents.last)
     val file = fc.selectedFile.getAbsolutePath
     Try(controller.save(file))
   }
 
-  def load = {
+  def load: Try[Unit] = {
     fc.showSaveDialog(contents.last)
     val file = fc.selectedFile.getAbsolutePath
     Try(controller.load(file))
@@ -247,6 +256,15 @@ class Gui(controller: Controller) extends Frame with Observer {
     controller.statusText()
     checkWin()
     redraw()
+  }
+
+  def micro(): Unit = {
+    val data = ""
+    val url = "http://localhost:8090/test.json"
+    implicit val system = ActorSystem()
+    Http().singleRequest(HttpRequest(POST, uri = url, entity = HttpEntity(`text/plain` withCharset `UTF-8`, data)))
+    println("Data: " + data)
+    //controller.gameboard.setBoard(data.split(",").map(_.toInt))
   }
 
   def help(): Unit = {
