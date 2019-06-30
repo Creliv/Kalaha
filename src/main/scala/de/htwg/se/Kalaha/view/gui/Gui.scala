@@ -259,12 +259,15 @@ class Gui(controller: Controller) extends Frame with Observer {
   }
 
   def micro(): Unit = {
-    val data = ""
-    val url = "http://localhost:8090/test.json"
+    val data = "C:/Users/BuSim/IdeaProjects/Kalaha/microservices/src/micros/Controller/test.json"
+    val url = "http://localhost:8090/"
     implicit val system = ActorSystem()
-    Http().singleRequest(HttpRequest(POST, uri = url, entity = HttpEntity(`text/plain` withCharset `UTF-8`, data)))
-    println("Data: " + data)
-    //controller.gameboard.setBoard(data.split(",").map(_.toInt))
+    Http().singleRequest(HttpRequest(POST, uri = url, entity = HttpEntity(`text/plain` withCharset `UTF-8`, data))).onComplete {
+      case Success(response) =>
+        controller.gameboard.setBoard(response.entity.asInstanceOf[HttpEntity.Strict].data.utf8String.split(",").map(_.toInt))
+        controller.notifyObservers
+
+    }
   }
 
   def help(): Unit = {
