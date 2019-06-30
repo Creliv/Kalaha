@@ -41,7 +41,6 @@ class Controller() extends Observable with ControllerInterface with Publisher{
     amountStones = x
   }
 
-  //TODO implement playerTurn and emptyField here (from gui/tui)
   def moveGui(inputX: Int, inputY: Int): Future[Unit] = {
     Future {
 
@@ -72,10 +71,16 @@ class Controller() extends Observable with ControllerInterface with Publisher{
       // turn >> playerTurn: Boolean
       if (inputX - 1== 0 && turn == 1) {
         index = inputY + 8
-        gameboard.doMove(index, oldgb)
+        gameboard.doMove(index, oldgb)/*.onComplete {
+          case Success(v) => round += 1
+          case Failure(e) => throw new Exception("Error: not your turn!")
+        }*/
       } else if (inputX + 1== 1 && turn == 0) {
         index = inputY + 1
-        gameboard.doMove(index, oldgb)
+        gameboard.doMove(index, oldgb)/*.onComplete {
+          case Success(v) => round += 1
+          case Failure(e) => throw new Exception("Error: not your turn!")
+        }*/
       } else {
         Failure(throw new Exception("Error: not your turn!"))
       }
@@ -132,15 +137,10 @@ class Controller() extends Observable with ControllerInterface with Publisher{
       case Failure(e) => println("Error: " + e)
     }
   }
-  //TODO doesnt get updated properly
+
   def statusText: String = GameStatus.message(gameStatus)
 
   def slicktestLoad(id: Int) = {
-//    gameboard.loadSlick(id).onComplete {
-//      case Success(board) => {
-//
-//      }
-//    }
     gameboard.loadSlick(id)
   }
 

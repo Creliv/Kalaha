@@ -50,12 +50,9 @@ class FileIO extends FileIOInterface {
 
       val board = (json \ "gameboard" \ "board").get.toString()
       val jsonList: List[JsValue] = Json.parse(board).as[List[JsValue]]
-      for (feld <- jsonList) {
-        for (i: Int <- 0 to 13) {
-          boardArray(i) = (feld \ i.toString).get.toString().toInt
-//                    controller.gameboard.gb(i) = (feld \ i.toString).get.toString().toInt
-        }
-      }
+      (0 to 13).foreach(i => {
+        boardArray(i) = (jsonList.head \ i.toString).get.toString().toInt
+      })
       boardArray
     }
   }

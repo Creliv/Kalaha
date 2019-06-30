@@ -2,25 +2,27 @@ package de.htwg.se.Kalaha.model.gameboardController
 
 import de.htwg.se.Kalaha.model.gameboardController.GameboardImpl.Gameboard
 
+import scala.concurrent.Future
+
 trait GameboardInterface {
 
-  def boardInit(amountStonesStart: Int): Option[Unit]
+  def boardInit(amountStonesStart: Int): Option[Array[Int]]
 
-  def boardInit(gameboard: Array[Int]): Option[Unit]
+  def boardInit(gameboard: Array[Int]): Option[Array[Int]]
 
-  def setBoard(newBoard: Array[Int]): Option[Unit]
+  def setBoard(newBoard: Array[Int]): Option[Array[Int]]
 
-  def setStones(amountStonesStart: Int): Unit
+  def setStones(amountStonesStart: Int): Boolean
 
-  def doMove(input: Int, oldgb: Gameboard): Unit
+  def doMove(input: Int, oldgb: Gameboard): Boolean
 
-  def setBoardPieces(oldgb: Gameboard, vBoard: Gameboard): Unit
+  def setBoardPieces(oldgb: Gameboard, vBoard: Gameboard): Boolean
 
-  def collectEnemyStones(last: Int): Unit
+  def collectEnemyStones(last: Int): Int
 
-  def checkExtra(last: Int): Unit
+  def checkExtra(last: Int): Boolean
 
-  def checkWin(): Unit
+  def checkWin(): Boolean
 
-  def win(): Unit
+  def win(): Boolean
 }

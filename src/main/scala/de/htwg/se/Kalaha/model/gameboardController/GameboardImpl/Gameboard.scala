@@ -5,7 +5,9 @@ import de.htwg.se.Kalaha.controller.controllerComponent.GameStatus.WON
 import de.htwg.se.Kalaha.model.doa.slick.SlickImpl
 import de.htwg.se.Kalaha.model.gameboardController.GameboardInterface
 
-import scala.util.{Success, Failure}
+import scala.concurrent.Future
+import scala.util.{Failure, Success}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 case class Gameboard(gb: Array[Int], controller: Controller) extends GameboardInterface {
   val SIZE = 14
@@ -15,98 +17,113 @@ case class Gameboard(gb: Array[Int], controller: Controller) extends GameboardIn
   val p2 = 0
 
   // deprecated function
-  def boardInit(amountStonesStart: Int): Option[Unit] = {
-    Some(setStones(amountStonesStart))
+  def boardInit(amountStonesStart: Int): Option[Array[Int]] = {
+    if (setStones(amountStonesStart)) Some(gb)
+    else None
   }
 
-  def boardInit(gameboard: Array[Int]): Option[Unit] = {
-    Some(gameboard.copyToArray(gb))
+  def boardInit(gameboard: Array[Int]): Option[Array[Int]] = {
+    gameboard.copyToArray(gb)
+    Some(gb)
   }
 
-  def setBoard(newBoard: Array[Int]): Option[Unit] = {
-    Some(newBoard.copyToArray(gb))
+  def setBoard(newBoard: Array[Int]): Option[Array[Int]] = {
+    newBoard.copyToArray(gb)
+    Some(gb)
   }
 
-  def clone(newBoard: Gameboard): Option[Unit] = {
-    Some(newBoard.copy(gb))
-  }
-
-  def setStones(amountStonesStart: Int): Unit = {
+  def setStones(amountStonesStart: Int): Boolean = {
     gb(0) = 0
     gb(7) = 0
 //    for (i <- 1 until 7) gb(i) = amountStonesStart
     (1 until 7).foreach {i => gb(i) = amountStonesStart}
 //    for (i <- 8 until 14) gb(i) = amountStonesStart
     (8 until 14).foreach {i => gb(i) = amountStonesStart}
+    true
   }
 
-  def doMove(input: Int, oldgb: Gameboard): Unit = {
-    var index = input
-    var last = 0
-    val turn = controller.round % 2
-    gb.copyToArray(oldgb.gb)
-    val countStonesInMuld: Int = gb(index)
-    gb(index) = 0
-//    for (i <- 1 until countStonesInMuld + 1)
-    (1 until countStonesInMuld+1).foreach { i =>
-      if ((turn == 0 && (index + i) % 14 == 0) || (turn == 1 && (index + i) % 14 == p1)) {
-        if (index + i >= gb.size) {
-          val y: Int = (index + i - gb.size) % 14
-          gb(y + 1) += 1
-          index += 1
+  def doMove(input: Int, oldgb: Gameboard): Boolean = {
+      var index = input
+      var last = 0
+      val turn = controller.round % 2
+      gb.copyToArray(oldgb.gb)
+      val countStonesInMuld: Int = gb(index)
+      gb(index) = 0
+      //    for (i <- 1 until countStonesInMuld + 1)
+      (1 until countStonesInMuld + 1).foreach { i =>
+        if ((turn == 0 && (index + i) % 14 == 0) || (turn == 1 && (index + i) % 14 == p1)) {
+          if (index + i >= gb.size) {
+            val y: Int = (index + i - gb.size) % 14
+            gb(y + 1) += 1
+            index += 1
+          } else {
+            gb(index + i) += 1
+          }
         } else {
-          gb(index + i) += 1
+          if (index + i >= gb.size) {
+            val y: Int = (index + i - gb.size) % 14
+            gb(y) += 1
+          } else {
+            gb(index + i) += 1
+          }
         }
-      } else {
-        if (index + i >= gb.size) {
-          val y: Int = (index + i - gb.size) % 14
-          gb(y) += 1
-        } else {
-          gb(index + i) += 1
-        }
+        if (i == countStonesInMuld) last = (index + i) % 14
       }
-      if (i == countStonesInMuld) last = (index + i) % 14
-    }
-    controller.undone = false
-    checkExtra(last)
-    controller.round += 1
+      controller.undone = false
+      checkExtra(last)
+      controller.round += 1
+      true
+
   }
 
-  def setBoardPieces(oldgb: Gameboard, vBoard: Gameboard): Unit = {
+  def setBoardPieces(oldgb: Gameboard, vBoard: Gameboard): Boolean = {
     gb.copyToArray(vBoard.gb)
     oldgb.gb.copyToArray(gb)
     vBoard.gb.copyToArray(oldgb.gb)
+    true
   }
 
-  def collectEnemyStones(last: Int): Unit = {
+  def collectEnemyStones(last: Int): Int = {
     var own = false
+    var stones = 0
     val turn = controller.round % 2
     if ((1 <= last) && (last <= 6) && turn == 0) own = true
     if ((8 <= last) && (last <= 13) && turn == 1) own = true
     if (own) {
       val idx = 14 - last
       if (turn == 0) {
-        gb(p1) += gb(idx)
-        gb(p1) += gb(last)
+        stones = gb(idx) + gb(last)
+//        gb(p1) += gb(idx)
+//        gb(p1) += gb(last)
         gb(idx) = 0
         gb(last) = 0
       } else {
-        gb(p2) += gb(idx)
-        gb(p2) += gb(last)
+        stones = gb(idx) + gb(last)
+//        gb(p2) += gb(idx)
+//        gb(p2) += gb(last)
         gb(idx) = 0
         gb(last) = 0
       }
     }
+    stones
   }
 
-  def checkExtra(last: Int): Unit = {
+  def checkExtra(last: Int): Boolean = {
     val turn = controller.round % 2
     if ((turn == 1 && last == 0) || (turn == 0 && last == 7)) controller.round -= 1
-    if (gb(last) == 1) collectEnemyStones(last)
+    if (gb(last) == 1) {
+      val stones = collectEnemyStones(last)
+      if (turn == 0) {
+        gb(p1) += stones
+      } else {
+        gb(p2) += stones
+      }
+    }
     controller.notifyObservers
+    true
   }
 
-  def checkWin(): Unit = {
+  def checkWin(): Boolean = {
     var x: Int = 0
 //    for (i <- 1 until 6 + 1) x += gb(i)
     (1 until 6+1).foreach {i => x += gb(i)}
@@ -114,9 +131,10 @@ case class Gameboard(gb: Array[Int], controller: Controller) extends GameboardIn
 //    for (i <- 1 until 6 + 1) y += gb(i + 7)
     (1 until 6+1).foreach {i => y += gb(i+7)}
     if (x == 0 || y == 0) win()
+    true
   }
 
-  def win(): Unit = {
+  def win(): Boolean = {
     var x: Int = 0
     for (i <- 1 until 6 + 1) {
       x += gb(i)
@@ -143,7 +161,9 @@ case class Gameboard(gb: Array[Int], controller: Controller) extends GameboardIn
         controller.p2win = true
         controller.p1win = true
     }
+
     controller.gameStatus = WON
+    true
     //notifyObservers
   }
 

@@ -9,7 +9,6 @@ class SetCommand (controller: Controller, inputX: Int, inputY: Int) extends Comm
     controller.moveTui(inputX,inputY)
   }
 
-  //TODO fix SetCommand Undo
   override def undoStep: Unit = {
     for (i <- 0 to 13) {
       controller.vBoard.gb(i) = controller.gameboard.gb(i)
@@ -18,7 +17,6 @@ class SetCommand (controller: Controller, inputX: Int, inputY: Int) extends Comm
     }
   }
 
-  //TODO fix SetCommand Redo
   override def redoStep: Unit = {
     for (i <- 0 to 13) {
       controller.vBoard.gb(i) = controller.gameboard.gb(i)

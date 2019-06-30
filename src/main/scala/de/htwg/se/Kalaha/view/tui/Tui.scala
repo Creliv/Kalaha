@@ -14,7 +14,6 @@ case class Tui(controller: Controller) extends Observer {
   print(showGameboard)
   print(printHelp())
 
-  //TODO parse moveinput
   def inputFct(input: String) = {
     checkPlayer
     input match {
