@@ -35,6 +35,7 @@ object Parser {
     while (true) {
       Thread.sleep(100)
     }
+    println(s"Server online at http://localhost:8090/")
     bindingFuture
       .flatMap(_.unbind())
       .onComplete(_ => system.terminate())

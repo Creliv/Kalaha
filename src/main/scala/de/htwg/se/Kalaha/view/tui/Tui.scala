@@ -1,5 +1,11 @@
 package de.htwg.se.Kalaha.view.tui
 
+import akka.actor.ActorSystem
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.model.{HttpEntity, HttpRequest}
+import akka.http.scaladsl.model.HttpCharsets._
+import akka.http.scaladsl.model.HttpMethods.POST
+import akka.http.scaladsl.model.MediaTypes.`text/plain`
 import de.htwg.se.Kalaha.controller.controllerComponent.ControllerImpl.Controller
 import de.htwg.se.Kalaha.util.Observer
 
@@ -31,6 +37,7 @@ case class Tui(controller: Controller) extends Observer {
       }
       case "reset" => controller.reset
       case "exit" => controller.exit
+      case "micro" => micro()
       case p if input.startsWith("p") && input.length <= 3 => {
         print(startTurn(input.charAt(1).toString.toInt, input.charAt(2).toString.toInt))
       }
@@ -148,6 +155,18 @@ def printHelp(): String = {
   "     exit => Beenden\n"
   str
 }
+
+  def micro(): Unit = {
+    val data = "C:/Users/BuSim/IdeaProjects/Kalaha/microservices/Controller/test.json"
+    val url = "http://localhost:8090/"
+    implicit val system = ActorSystem()
+    Http().singleRequest(HttpRequest(POST, uri = url, entity = HttpEntity(`text/plain` withCharset `UTF-8`, data))).onComplete {
+      case Success(response) =>
+        controller.gameboard.setBoard(response.entity.asInstanceOf[HttpEntity.Strict].data.utf8String.split(",").map(_.toInt))
+        update()
+
+    }
+  }
 
 override def update(): Unit = {
   print(checkPlayer)

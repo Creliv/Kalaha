@@ -259,7 +259,7 @@ class Gui(controller: Controller) extends Frame with Observer {
   }
 
   def micro(): Unit = {
-    val data = "C:/Users/BuSim/IdeaProjects/Kalaha/microservices/src/micros/Controller/test.json"
+    val data = "C:/Users/BuSim/IdeaProjects/Kalaha/microservices/Controller/test.json"
     val url = "http://localhost:8090/"
     implicit val system = ActorSystem()
     Http().singleRequest(HttpRequest(POST, uri = url, entity = HttpEntity(`text/plain` withCharset `UTF-8`, data))).onComplete {
