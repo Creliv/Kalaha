@@ -32,7 +32,14 @@ object Kalaha extends Observable{
   val tui = Await.result(tuiFuture, timeout.duration).asInstanceOf[Tui]
 
   val wb = new WebServer(tui)
-  wb.start
+//  wb.start
+
+  val thread = new Thread {
+    override def run: Unit = {
+      wb.start
+    }
+  }
+  thread.start()
 
   def main(args: Array[String]): Unit = {
     var input = ""
