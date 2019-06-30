@@ -17,7 +17,7 @@ class FileIO extends FileIOInterface {
       val source1: String = Source.fromFile(path).getLines.mkString
       val json1: JsValue = Json.parse(source1)
       loadRound(json1, controller) match {
-        case Success(v) => controller.gameboard.round = v
+        case Success(v) => controller.round = v
         case Failure(e) => println("Error: Could not parse Json-File for <round>" + e)
       }
       loadStones(json1, controller) match {
@@ -71,7 +71,7 @@ class FileIO extends FileIOInterface {
   def toJson(controller: Controller): JsValue = {
     Json.obj(
       "gameboard" -> Json.obj(
-        "round" -> JsNumber(controller.gameboard.round),
+        "round" -> JsNumber(controller.round),
         "amountstones" -> JsNumber(controller.amountStones),
         "board" -> Json.arr(
           Json.obj(

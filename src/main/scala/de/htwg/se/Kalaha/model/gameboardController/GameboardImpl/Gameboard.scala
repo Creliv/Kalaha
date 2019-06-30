@@ -14,8 +14,6 @@ case class Gameboard(gb: Array[Int], controller: Controller) extends GameboardIn
   val p1 = 7
   val p2 = 0
 
-  var round = 0
-
   // deprecated function
   def boardInit(amountStonesStart: Int): Option[Unit] = {
     Some(setStones(amountStonesStart))
@@ -29,28 +27,28 @@ case class Gameboard(gb: Array[Int], controller: Controller) extends GameboardIn
     Some(newBoard.copyToArray(gb))
   }
 
-  //TODO function to clone gameboard
   def clone(newBoard: Gameboard): Option[Unit] = {
     Some(newBoard.copy(gb))
   }
 
   def setStones(amountStonesStart: Int): Unit = {
-    val stones2 = amountStonesStart
     gb(0) = 0
     gb(7) = 0
-    for (i <- 1 until 7) gb(i) = amountStonesStart
-    for (i <- 8 until 14) gb(i) = amountStonesStart
+//    for (i <- 1 until 7) gb(i) = amountStonesStart
+    (1 until 7).foreach {i => gb(i) = amountStonesStart}
+//    for (i <- 8 until 14) gb(i) = amountStonesStart
+    (8 until 14).foreach {i => gb(i) = amountStonesStart}
   }
 
   def doMove(input: Int, oldgb: Gameboard): Unit = {
     var index = input
     var last = 0
-    var turn = round % 2
+    val turn = controller.round % 2
     gb.copyToArray(oldgb.gb)
-    //TODO check if mulde is empty.
     val countStonesInMuld: Int = gb(index)
     gb(index) = 0
-    for (i <- 1 until countStonesInMuld + 1) {
+//    for (i <- 1 until countStonesInMuld + 1)
+    (1 until countStonesInMuld+1).foreach { i =>
       if ((turn == 0 && (index + i) % 14 == 0) || (turn == 1 && (index + i) % 14 == p1)) {
         if (index + i >= gb.size) {
           val y: Int = (index + i - gb.size) % 14
@@ -71,7 +69,7 @@ case class Gameboard(gb: Array[Int], controller: Controller) extends GameboardIn
     }
     controller.undone = false
     checkExtra(last)
-    round += 1
+    controller.round += 1
   }
 
   def setBoardPieces(oldgb: Gameboard, vBoard: Gameboard): Unit = {
@@ -82,11 +80,12 @@ case class Gameboard(gb: Array[Int], controller: Controller) extends GameboardIn
 
   def collectEnemyStones(last: Int): Unit = {
     var own = false
-    if ((1 <= last) && (last <= 6) && round % 2 == 0) own = true
-    if ((8 <= last) && (last <= 13) && round % 2 == 1) own = true
+    val turn = controller.round % 2
+    if ((1 <= last) && (last <= 6) && turn == 0) own = true
+    if ((8 <= last) && (last <= 13) && turn == 1) own = true
     if (own) {
       val idx = 14 - last
-      if (round % 2 == 0) {
+      if (turn == 0) {
         gb(p1) += gb(idx)
         gb(p1) += gb(last)
         gb(idx) = 0
@@ -101,16 +100,19 @@ case class Gameboard(gb: Array[Int], controller: Controller) extends GameboardIn
   }
 
   def checkExtra(last: Int): Unit = {
-    if ((round % 2 == 1 && last == 0) || (round % 2 == 0 && last == 7)) round -= 1
+    val turn = controller.round % 2
+    if ((turn == 1 && last == 0) || (turn == 0 && last == 7)) controller.round -= 1
     if (gb(last) == 1) collectEnemyStones(last)
     controller.notifyObservers
   }
 
   def checkWin(): Unit = {
     var x: Int = 0
-    for (i <- 1 until 6 + 1) x += gb(i)
+//    for (i <- 1 until 6 + 1) x += gb(i)
+    (1 until 6+1).foreach {i => x += gb(i)}
     var y: Int = 0
-    for (i <- 1 until 6 + 1) y += gb(i + 7)
+//    for (i <- 1 until 6 + 1) y += gb(i + 7)
+    (1 until 6+1).foreach {i => y += gb(i+7)}
     if (x == 0 || y == 0) win()
   }
 
@@ -151,7 +153,7 @@ case class Gameboard(gb: Array[Int], controller: Controller) extends GameboardIn
       case Success(boardValues) => {
         val array = boardValues._4.split(";").map(_.toInt)
         boardInit(array)
-        round = boardValues._3
+        controller.round = boardValues._3
         controller.amountStones = boardValues._2
         controller.notifyObservers()
       }
@@ -160,7 +162,7 @@ case class Gameboard(gb: Array[Int], controller: Controller) extends GameboardIn
   }
 
   def saveSlick(id: Int) = {
-    SlickImpl.insert(id, controller.amountStones, round, gb.mkString(";"))
+    SlickImpl.insert(id, controller.amountStones, controller.round, gb.mkString(";"))
   }
 
 
