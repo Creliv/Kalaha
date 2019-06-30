@@ -20,16 +20,16 @@ object Parser {
   def start: Unit = {
 
     val route: Route =
-        //path("load") {
-          post {
-            entity(as[String]) { pathToFile =>
-              complete(HttpResponse(entity = HttpEntity(ContentTypes.`application/json`, Parser_Controller.loadBoard(pathToFile))))
-            }
-          }
-          //         complete {
-          //           "Laden"
-          //        }
-        //}
+    //path("load") {
+      post {
+        entity(as[String]) { pathToFile =>
+          complete(HttpResponse(entity = HttpEntity(ContentTypes.`application/json`, Parser_Controller.loadBoard(pathToFile))))
+        }
+      }
+    //         complete {
+    //           "Laden"
+    //        }
+    //}
 
     val bindingFuture = Http().bindAndHandle(route, "localhost", 8090)
     while (true) {

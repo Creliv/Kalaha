@@ -1,0 +1,16 @@
+version: '3'
+services:
+  game:
+    build: ./
+    image: game:latest
+    container_name: game
+    ports:
+      - "9000:9000"
+    stdin_open: true
+    tty: true
+  api:
+    build: ./microservices/
+    image: api:latest
+    container_name: api
+    ports:
+      - "8000:8000"
