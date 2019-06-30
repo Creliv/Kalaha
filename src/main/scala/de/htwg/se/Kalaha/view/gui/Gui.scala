@@ -159,7 +159,7 @@ class Gui(controller: Controller) extends Frame with Observer {
   }
 
   def redraw(): Unit = {
-    if (controller.gameboard.round % 2 == 0) {
+    if (controller.round % 2 == 0) {
       textPanel.background = Color.decode("#cc2023")
       str = "Spieler 1 ist am Zug"
       textPanel.text_=(str)

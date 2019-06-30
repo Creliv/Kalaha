@@ -15,8 +15,7 @@ object SlickImpl extends DoaInterface{
   private val board = TableQuery[BoardTable]
 
   override def findById(id: Int): Future[(Int, Int, Int, String)] = {
-    val q = db.run(board.filter(f => f.id === id).result.head)
-    q
+    db.run(board.filter(f => f.id === id).result.head)
   }
 
   override def insert(id: Int, aStones: Int, round: Int, boardvalues: String) = {
@@ -25,7 +24,6 @@ object SlickImpl extends DoaInterface{
 //    val insertActions = DBIO.seq(
 //      board += (id, aStones, round, boardArray)
 //    )
-    println("yooo")
   }
 
   override def update(id: Int, aStones: Int, round: Int, boardArray: String) = {

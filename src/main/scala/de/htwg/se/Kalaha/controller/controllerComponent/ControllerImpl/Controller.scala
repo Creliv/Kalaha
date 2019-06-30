@@ -31,6 +31,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
 
   var playerTurn1 = true
   var playerTurn2 = false
+  var round = 0
 
   updateStones(6)
   gameboard.boardInit(boardArray).getOrElse(new Exception("Error: Could not initialize board!"))
@@ -45,7 +46,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
     Future {
 
       var index = inputY
-      var turn = gameboard.round % 2
+      var turn = round % 2
 
       print(inputX)
       // turn >> playerTurn: Boolean
@@ -65,7 +66,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
     Future {
       var index = inputY
       //var index = 0
-      var turn = gameboard.round % 2
+      var turn = round % 2
 
       print(inputX)
       // turn >> playerTurn: Boolean
@@ -87,7 +88,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
     } else {
       gameStatus = UNDO
       undoManager.undoMove.get
-      gameboard.round -= 1
+      round -= 1
       undone = true
       notifyObservers
     }
@@ -99,7 +100,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
     } else {
       gameStatus = REDO
       undoManager.redoMove.get
-      gameboard.round += 1
+      round += 1
       undone = false
       notifyObservers
     }
@@ -113,7 +114,7 @@ class Controller() extends Observable with ControllerInterface with Publisher{
       }
       case None => println("Error: Could not initialize board1!")
     }
-    gameboard.round = 0
+    round = 0
     notifyObservers
   }
 
