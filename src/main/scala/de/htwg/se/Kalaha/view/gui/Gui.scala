@@ -10,6 +10,7 @@ import scala.swing._
 import scala.swing.event._
 import scala.util._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class Gui(controller: Controller) extends Frame with Observer {
 
@@ -208,11 +209,11 @@ class Gui(controller: Controller) extends Frame with Observer {
     }
   }
 
-  def saveSlick = {
+  def saveSlick: Future[Int] = {
     controller.slicktestSave(1)
   }
 
-  def loadSlick = {
+  def loadSlick: Try[String] = {
     controller.slicktestLoad(1)
   }
 

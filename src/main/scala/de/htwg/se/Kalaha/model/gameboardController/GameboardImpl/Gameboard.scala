@@ -3,6 +3,7 @@ package de.htwg.se.Kalaha.model.gameboardController.GameboardImpl
 import de.htwg.se.Kalaha.controller.controllerComponent.ControllerImpl.Controller
 import de.htwg.se.Kalaha.controller.controllerComponent.GameStatus.WON
 import de.htwg.se.Kalaha.model.doa.slick.SlickImpl
+import de.htwg.se.Kalaha.model.doa.mongo.MongoImpl
 import de.htwg.se.Kalaha.model.gameboardController.GameboardInterface
 
 import scala.concurrent.Future
@@ -167,22 +168,40 @@ case class Gameboard(gb: Array[Int], controller: Controller) extends GameboardIn
     //notifyObservers
   }
 
-  def loadSlick(id: Int) = {
+  def loadSlick(id: Int): Future[Boolean] = {
     import scala.concurrent.ExecutionContext.Implicits.global
-    SlickImpl.findById(id).onComplete {
-      case Success(boardValues) => {
-        val array = boardValues._4.split(";").map(_.toInt)
-        boardInit(array)
-        controller.round = boardValues._3
-        controller.amountStones = boardValues._2
-        controller.notifyObservers()
+    Future {
+      SlickImpl.findById(id).onComplete {
+        case Success(boardValues) => {
+          val array = boardValues._4.split(";").map(_.toInt)
+          boardInit(array) match {
+            case Some(v) => "Slick: boardinit worked"
+            case None => "Slick: couldn't initialize board"
+          }
+          controller.round = boardValues._3
+          controller.amountStones = boardValues._2
+          controller.notifyObservers()
+        }
+        case Failure(e) => println("Error: Failed to load game id" + e)
       }
-      case Failure(e) => println("Error: Failed to load game id" + e)
+      true
     }
   }
 
-  def saveSlick(id: Int) = {
-    SlickImpl.insert(id, controller.amountStones, controller.round, gb.mkString(";"))
+  def saveSlick(id: Int): Future[Int] = {
+//    SlickImpl.insert(id, controller.amountStones, controller.round, gb.mkString(";"))
+    SlickImpl.insert(id, controller)
+  }
+
+  def loadMongo(id: Int):Future[Boolean] = {
+    Future{
+      true
+    }
+  }
+
+  def saveMongo(id: Int): Future[Int] = {
+    import de.htwg.se.Kalaha.model.doa.mongo.MongoImpl
+    MongoImpl.insert(id, controller)
   }
 
 

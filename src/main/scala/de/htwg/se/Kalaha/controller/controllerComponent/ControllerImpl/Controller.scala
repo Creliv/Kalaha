@@ -141,10 +141,19 @@ class Controller() extends Observable with ControllerInterface with Publisher{
   def statusText: String = GameStatus.message(gameStatus)
 
   def slicktestLoad(id: Int) = {
-    gameboard.loadSlick(id)
+    if (gameboard.loadSlick(id).isCompleted) Success("Slick: Loading successful")
+    else Failure(throw new Exception("Slick: Loading failed!"))
   }
 
-  def slicktestSave(id: Int) = {
+  def slicktestSave(id: Int): Future[Int] = {
     gameboard.saveSlick(id)
+  }
+
+  def mongoLoad(id: Int) = {
+    gameboard.loadMongo(id)
+  }
+
+  def mongoSave(id: Int) = {
+    gameboard.saveMongo(id)
   }
 }

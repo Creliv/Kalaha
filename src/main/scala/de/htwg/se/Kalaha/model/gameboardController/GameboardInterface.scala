@@ -25,4 +25,12 @@ trait GameboardInterface {
   def checkWin(): Boolean
 
   def win(): Boolean
+
+  def loadSlick(id: Int): Future[Boolean]
+
+  def saveSlick(id: Int): Future[Int]
+
+  def loadMongo(id: Int):Future[Boolean]
+
+  def saveMongo(id: Int): Future[Int]
 }
