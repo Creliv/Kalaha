@@ -25,7 +25,7 @@ object MongoImpl{
   def findById(id: Int)= {
     Future {
       val result = collection.find(equal("id", id)).first()
-      
+
 
     }
   }
