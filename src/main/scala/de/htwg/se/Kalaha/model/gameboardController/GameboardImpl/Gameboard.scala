@@ -195,6 +195,19 @@ case class Gameboard(gb: Array[Int], controller: Controller) extends GameboardIn
 
   def loadMongo(id: Int):Future[Boolean] = {
     Future{
+      MongoImpl.findById(id).onComplete {
+        case Success(boardvalues) => {
+          val array = boardvalues._4.split(";").map(_.toInt)
+          boardInit(array) match {
+            case Some(v) => "Slick: boardinit worked"
+            case None => "Slick: couldn't initialize board"
+          }
+          controller.round = boardvalues._3
+          controller.amountStones = boardvalues._2
+          controller.notifyObservers()
+        }
+        case Failure(e) => println("Error: Failed to load game id" + e)
+      }
       true
     }
   }

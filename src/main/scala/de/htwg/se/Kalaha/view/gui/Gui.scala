@@ -120,6 +120,15 @@ class Gui(controller: Controller) extends Frame with Observer {
         loadSlick
       })
     }
+    contents += new Menu("Mongo") {
+      mnemonic = Key.S
+      contents += new MenuItem(Action("Spiel speichern") {
+        saveMongo
+      })
+      contents += new MenuItem(Action("Spiel laden") {
+        loadMongo
+      })
+    }
   }
   visible = true
 
@@ -209,12 +218,38 @@ class Gui(controller: Controller) extends Frame with Observer {
     }
   }
 
-  def saveSlick: Future[Int] = {
-    controller.slicktestSave(1)
+  def saveSlick = {
+    val saveGameNameDialog = Dialog.showInput(null, "Bitte eine Speicher ID eingeben:", initial="Neues Spiel")
+    saveGameNameDialog match {
+      case None => println("Keine ID eingegeben")
+      case Some(saveID) => controller.slicktestSave(saveID.toInt)
+    }
   }
 
-  def loadSlick: Try[String] = {
-    controller.slicktestLoad(1)
+  def loadSlick = {
+    val saveGameNameDialog = Dialog.showInput(null, "Bitte eine Speicher ID eingeben:", initial="Neues Spiel")
+    saveGameNameDialog match {
+      case None => println("Keine ID eingegeben")
+      case Some(saveID) => controller.slicktestLoad(saveID.toInt)
+    }
+  }
+
+  def saveMongo = {
+    val saveGameNameDialog = Dialog.showInput(null, "Bitte eine Speicher ID eingeben:", initial="Neues Spiel")
+    saveGameNameDialog match {
+      case None => println("Keine ID eingegeben")
+      case Some(saveID) => controller.mongoSave(saveID.toInt)
+    }
+
+  }
+
+  def loadMongo = {
+    val saveGameNameDialog = Dialog.showInput(null, "Bitte eine Speicher ID eingeben:", initial="Neues Spiel")
+    saveGameNameDialog match {
+      case None => println("Keine ID eingegeben")
+      case Some(saveID) => controller.mongoLoad(saveID.toInt)
+    }
+
   }
 
   def checkWin(): Unit = {

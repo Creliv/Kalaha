@@ -13,27 +13,49 @@ import play.api.libs.json.Json
 import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
+import scala.util.Success
 
-object MongoImpl{
-  //TODO implement MongoDB
+object MongoImpl extends DoaInterface {
   private val mongoClient: MongoClient = MongoClient()
   private val database: MongoDatabase = mongoClient.getDatabase("kalahaDB")
   val collection: MongoCollection[Document] = database.getCollection("boardconfig")
 
   implicit val timeout = Timeout(5, TimeUnit.SECONDS)
 
-  def findById(id: Int)= {
+  def findById(id: Int): Future[(Int, Int, Int, String)] = {
     Future {
-      val result = collection.find(equal("id", id)).first()
+      var waitYOO = true
+      var aStones, round = 0
+      var board = ""
+      val result: Observable[Document] = collection.find(equal("_id", id)).first()
+      println(result)
+      result.subscribe(new Observer[Document] {
+        override def onNext(res: Document): Unit = {
+          println("res: " + res)
+          aStones = res("amountStones").asInt32.getValue
+          round = res("round").asInt32().getValue
+          board = res("boardvalues").asString().getValue
+         }
+        override def onError(e: Throwable): Unit = println("Failed")
+        override def onComplete(): Unit = {
+          waitYOO = false
+          println("Completed")
+        }
+      })
 
+      while (waitYOO) {
+        Thread.sleep(10)
+      }
 
+      println((id, aStones, round, board))
+      (id, aStones, round, board)
     }
   }
 
   def insert(id: Int, controller: Controller): Future[Int] = {
     Future{
-      val document: Document = Document(Json.obj("_id" -> id, "amountStones" -> controller.amountStones,
-        "round" -> controller.round, "boardvalues" -> controller.gameboard.gb.mkString(";")).toString())
+      val document: Document = Document("_id" -> id, "amountStones" -> controller.amountStones,
+        "round" -> controller.round, "boardvalues" -> controller.gameboard.gb.mkString(";").toString())
       val resFut = collection.insertOne(document).toFuture()
       Await.result(resFut, Duration.Inf)
       1
