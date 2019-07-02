@@ -43,12 +43,8 @@ class Controller() extends Observable with ControllerInterface with Publisher{
 
   def moveGui(inputX: Int, inputY: Int): Future[Unit] = {
     Future {
-
       var index = inputY
       var turn = round % 2
-
-      print(inputX)
-      // turn >> playerTurn: Boolean
       if (inputX == 0 && turn == 1) {
         index = 13 - inputY
         gameboard.doMove(index, oldgb)
@@ -64,24 +60,13 @@ class Controller() extends Observable with ControllerInterface with Publisher{
   def moveTui(inputX: Int, inputY: Int): Future[Unit] = {
     Future {
       var index = inputY
-      //var index = 0
       var turn = round % 2
-
-      print(inputX)
-      // turn >> playerTurn: Boolean
       if (inputX - 1== 0 && turn == 1) {
         index = inputY + 8
-        gameboard.doMove(index, oldgb)/*.onComplete {
-          case Success(v) => round += 1
-          case Failure(e) => throw new Exception("Error: not your turn!")
-        }*/
+        gameboard.doMove(index, oldgb)
       } else if (inputX + 1== 1 && turn == 0) {
         index = inputY + 1
-        gameboard.doMove(index, oldgb)/*.onComplete {
-          case Success(v) => round += 1
-          case Failure(e) => throw new Exception("Error: not your turn!")
-        }*/
-      } else {
+        gameboard.doMove(index, oldgb)
         Failure(throw new Exception("Error: not your turn!"))
       }
     }

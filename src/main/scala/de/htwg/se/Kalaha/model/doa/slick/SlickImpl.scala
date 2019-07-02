@@ -21,9 +21,6 @@ object SlickImpl extends DoaInterface{
   override def insert(id: Int, controller: Controller): Future[Int] = {
     Await.result(db.run(board.schema.createIfNotExists), Duration.Inf)
     db.run(board += (id, controller.amountStones, controller.round, controller.gameboard.gb.mkString(";")))
-    //    val insertActions = DBIO.seq(
-    //      board += (id, aStones, round, boardArray)
-    //    )
   }
 
   override def update(id: Int, aStones: Int, round: Int, boardArray: String): Future[Int] = {
